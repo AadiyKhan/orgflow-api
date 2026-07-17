@@ -46,27 +46,27 @@
 }
 
 html.dark {
-  --surface-0: #121212;
-  --surface-1: #1e1e1e;
-  --surface-2: #2d2d2d;
-  --bg-color: #121212;
-  --bg-pattern: radial-gradient(#333 1px, transparent 1px);
-  --card-bg: #1e1e1e;
-  --text-main: #f4f4f5;
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
+  --surface-0: #1a1614;
+  --surface-1: #241e1c;
+  --surface-2: #362d29;
+  --bg-color: #1a1614;
+  --bg-pattern: radial-gradient(#3a2e2a 1px, transparent 1px);
+  --card-bg: #241e1c;
+  --text-main: #fcf8f5;
+  --text-primary: #fcf8f5;
+  --text-secondary: #c9bcae;
+  --text-tertiary: #8f8278;
   
-  --border-default: #333333;
-  --border-color: #333333;
+  --border-default: #4f3a2c;
+  --border-color: #4f3a2c;
   
-  --violet: #FF00FF;
-  --violet-hover: #D500D5;
-  --violet-muted: #3D003D;
+  --violet: #FF5A00;
+  --violet-hover: #E04E00;
+  --violet-muted: #3a1500;
 
-  --shadow-sm: 2px 2px 0px #00E5FF;
-  --shadow-md: 4px 4px 0px #00E5FF;
-  --shadow-lg: 6px 6px 0px #00E5FF;
+  --shadow-sm: 2px 2px 0px #FF5A00;
+  --shadow-md: 4px 4px 0px #FF5A00;
+  --shadow-lg: 6px 6px 0px #FF5A00;
 }
 
 /* View Transition API for Dark Mode Toggle */

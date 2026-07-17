@@ -79,8 +79,34 @@ export default function Settings() {
                 <div className="card-icon" style={{ background: 'var(--violet-muted)' }}><Palette size={16} color="var(--violet)" /></div>
                 <div><div className="card-label">Appearance</div><div className="card-desc">Toggle Dark/Light mode theme.</div></div>
               </div>
-              <button className="btn" onClick={() => {
-                document.documentElement.classList.toggle('dark');
+              <button className="btn" onClick={(e) => {
+                if (!document.startViewTransition) {
+                  document.documentElement.classList.toggle('dark');
+                  fire('Theme updated');
+                  return;
+                }
+                const x = e.clientX || window.innerWidth / 2;
+                const y = e.clientY || window.innerHeight / 2;
+                const endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+                const transition = document.startViewTransition(() => {
+                  document.documentElement.classList.toggle('dark');
+                });
+                transition.ready.then(() => {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  document.documentElement.animate(
+                    {
+                      clipPath: [
+                        `circle(0px at ${x}px ${y}px)`,
+                        `circle(${endRadius}px at ${x}px ${y}px)`,
+                      ],
+                    },
+                    {
+                      duration: 500,
+                      easing: 'ease-in-out',
+                      pseudoElement: isDark ? '::view-transition-new(root)' : '::view-transition-old(root)',
+                    }
+                  );
+                });
                 fire('Theme updated');
               }}>Toggle</button>
             </div>
