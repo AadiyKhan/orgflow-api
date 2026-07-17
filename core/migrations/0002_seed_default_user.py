@@ -86,6 +86,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0001_initial'),
+        ('projects', '0001_initial'),
     ]
 
     operations = [
