@@ -67,7 +67,7 @@ export default function Settings() {
 
   return (
     <Layout pageTitle="Workspace Settings">
-      <div style={{ padding: '2rem', flex: 1, overflowY: 'auto', position: 'relative' }}>
+      <div style={{ padding: '2.5rem', flex: 1, overflowY: 'auto', position: 'relative' }}>
         
         {/* Toast Notification */}
         {toast && (
@@ -76,7 +76,7 @@ export default function Settings() {
             background: 'var(--gradient-vibe)', color: '#fff', 
             padding: '0.75rem 1.5rem', borderRadius: '8px', 
             boxShadow: '0 8px 32px var(--accent-glow)', 
-            fontWeight: '600', zIndex: 100,
+            fontWeight: '500', zIndex: 100,
             animation: 'float 2s ease-in-out infinite'
           }}>
             {toast}
@@ -90,16 +90,16 @@ export default function Settings() {
           <div className="flex-col gap-4">
 
             {/* Profile Settings */}
-            <div className="glass-card flex-col gap-4" style={{ padding: '1.5rem', borderRadius: '16px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
-              <div className="flex gap-4 items-center mb-2">
-                <UserIcon size={20} color="var(--accent-primary)" />
+            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
+              <div className="flex gap-4 items-start mb-6">
+                <UserIcon size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
                 <div>
                   <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: 0 }}>My Profile</h4>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Update your personal details.</p>
                 </div>
               </div>
               
-              <form onSubmit={handleUpdateProfile} className="flex-col gap-4" style={{ maxWidth: '400px' }}>
+              <form onSubmit={handleUpdateProfile} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>First Name</label>
                   <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jane" />
@@ -108,57 +108,57 @@ export default function Settings() {
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Last Name</label>
                   <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Doe" />
                 </div>
-                <div className="flex items-center gap-4 mt-2">
+                <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
+                  {message && <span style={{ fontSize: '0.8125rem', color: message.includes('Failed') ? 'var(--danger)' : 'var(--success)' }}>{message}</span>}
                   <button type="submit" className="btn btn-primary" disabled={saving}>
                     {saving ? 'Saving...' : 'Save Profile'}
                   </button>
-                  {message && <span style={{ fontSize: '0.8125rem', color: message.includes('Failed') ? 'var(--danger)' : 'var(--success)' }}>{message}</span>}
                 </div>
               </form>
             </div>
             
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.25rem 1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
+            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
               <div className="flex gap-4">
                 <Shield size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
                 <div>
-                  <h4 style={{ fontSize: '0.9375rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Security & Authentication</h4>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Security & Authentication</h4>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Manage your password, 2FA, and active sessions.</p>
                 </div>
               </div>
               <button onClick={() => showToast('Security settings are optimal.')} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}>Manage</button>
             </div>
 
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.25rem 1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
+            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
               <div className="flex gap-4">
                 <Palette size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
                 <div>
-                  <h4 style={{ fontSize: '0.9375rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Appearance</h4>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Appearance</h4>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Customize theme, density, and accessibility options.</p>
                 </div>
               </div>
               <button onClick={() => showToast('Appearance synced with system.')} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}>Manage</button>
             </div>
 
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.25rem 1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
+            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
               <div className="flex gap-4">
                 <Bell size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
                 <div>
-                  <h4 style={{ fontSize: '0.9375rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Notifications</h4>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Notifications</h4>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Configure email and push notification preferences.</p>
                 </div>
               </div>
               <button onClick={() => showToast('Notifications configured.')} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}>Manage</button>
             </div>
             
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.25rem 1.5rem', borderRadius: '12px', background: 'var(--bg-card)', borderLeft: '3px solid var(--danger)' }}>
+            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', borderLeft: '3px solid var(--danger)' }}>
               <div className="flex gap-4">
                 <Key size={20} color="var(--danger)" style={{ marginTop: '2px' }} />
                 <div>
-                  <h4 style={{ fontSize: '0.9375rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>API Keys</h4>
+                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>API Keys</h4>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Generate API tokens for programmatic access.</p>
                 </div>
               </div>
-              <button onClick={generateApiKey} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255, 51, 102, 0.1)', color: 'var(--danger)' }}>Generate Token</button>
+              <button onClick={generateApiKey} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(244, 63, 94, 0.1)', color: 'var(--danger)' }}>Generate Token</button>
             </div>
 
           </div>
@@ -167,14 +167,14 @@ export default function Settings() {
 
       {/* API Key Modal */}
       {showApiKey && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div className="glass-panel" style={{ width: '450px', padding: '2.5rem' }}>
-            <h3 className="text-gradient" style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '700' }}>New API Token Generated</h3>
+            <h3 className="text-gradient" style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>New API Token Generated</h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
               Make sure to copy your API key now. You won't be able to see it again!
             </p>
             
-            <div className="flex items-center justify-between" style={{ background: '#050505', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+            <div className="flex items-center justify-between" style={{ background: '#0A0A0B', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
               <code style={{ color: 'var(--accent-primary)', fontSize: '0.875rem', letterSpacing: '0.05em' }}>{apiKey}</code>
               <button onClick={copyToClipboard} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>
                 <Copy size={16} />
