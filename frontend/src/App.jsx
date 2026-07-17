@@ -7,6 +7,9 @@ import Dashboard from './pages/Dashboard';
 import Team from './pages/Team';
 import Settings from './pages/Settings';
 
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
 const queryClient = new QueryClient();
 
 function PrivateRoute({ children }) {
@@ -22,6 +25,8 @@ export default function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route 
             path="/dashboard" 
             element={

@@ -104,6 +104,66 @@ class RegisterView(APIView):
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
 
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.conf import settings
+
+class RequestPasswordResetView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Return a generic success to prevent email enumeration
+            return Response({'message': 'If an account with this email exists, a password reset link has been sent.'}, status=status.HTTP_200_OK)
+            
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Link typically points to frontend
+        reset_link = f"http://localhost:5173/reset-password?uid={uid}&token={token}"
+        
+        send_mail(
+            subject='Reset your OrgFlow Password',
+            message=f'Click the link below to reset your password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        
+        return Response({'message': 'If an account with this email exists, a password reset link has been sent.'}, status=status.HTTP_200_OK)
+
+class ConfirmPasswordResetView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get('uid')
+        token = request.data.get('token')
+        password = request.data.get('password')
+        
+        if not all([uidb64, token, password]):
+            return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+            
+        if user is not None and default_token_generator.check_token(user, token):
+            user.set_password(password)
+            user.save()
+            return Response({'message': 'Password has been reset successfully'}, status=status.HTTP_200_OK)
+            
+        return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
+
 class InviteMemberView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOrganizationAdmin]
 
@@ -120,8 +180,10 @@ class InviteMemberView(APIView):
             
         try:
             target_user = User.objects.get(email=email)
+            is_new = False
         except User.DoesNotExist:
             target_user = User.objects.create_user(email=email, password='password123')
+            is_new = True
             
         # Check if already a member
         if OrganizationMember.objects.filter(organization=org, user=target_user).exists():
@@ -137,6 +199,22 @@ class InviteMemberView(APIView):
         if not target_user.current_organization:
             target_user.current_organization = org
             target_user.save()
+            
+        # Send invite email
+        login_url = "http://localhost:5173/login"
+        msg = f"You have been invited to join the organization '{org.name}' on OrgFlow.\n\n"
+        if is_new:
+            msg += f"An account has been created for you.\nEmail: {email}\nTemporary Password: password123\n\nPlease log in and change your password.\n{login_url}"
+        else:
+            msg += f"Log in to access your new workspace: {login_url}"
+            
+        send_mail(
+            subject=f"You're invited to {org.name} on OrgFlow",
+            message=msg,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=True,
+        )
             
         return Response({
             'message': f'Successfully added {email} to {org.name}',

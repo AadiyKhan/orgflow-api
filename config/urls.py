@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_nested import routers
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from core.views import UserViewSet, OrganizationViewSet, OrganizationMemberViewSet, RegisterView, InviteMemberView
+from core.views import UserViewSet, OrganizationViewSet, OrganizationMemberViewSet, RegisterView, InviteMemberView, RequestPasswordResetView, ConfirmPasswordResetView
 from projects.views import ProjectViewSet, TaskViewSet, CommentViewSet
 
 # Main router
@@ -32,6 +32,8 @@ urlpatterns = [
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/register/', RegisterView.as_view(), name='register'),
     path('api/auth/invite/', InviteMemberView.as_view(), name='invite'),
+    path('api/auth/password-reset/', RequestPasswordResetView.as_view(), name='password_reset'),
+    path('api/auth/password-reset/confirm/', ConfirmPasswordResetView.as_view(), name='password_reset_confirm'),
     
     # API endpoints
     path('api/', include(router.urls)),

@@ -37,7 +37,13 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="flex-col gap-3">
           <div><label>Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@example.com" required /></div>
-          <div><label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" required /></div>
+          <div>
+            <div className="flex justify-between items-center" style={{ marginBottom: '0.375rem' }}>
+              <label style={{ marginBottom: 0 }}>Password</label>
+              <Link to="/forgot-password" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--violet)', textDecoration: 'none' }}>Forgot Password?</Link>
+            </div>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
+          </div>
           <button type="submit" className="btn btn-primary w-full mt-2" disabled={loading} style={{ padding: '0.5rem' }}>
             {loading ? 'Signing in...' : (<>Continue <ArrowRight size={15} /></>)}
           </button>
