@@ -53,8 +53,8 @@ export default function Register() {
             {loading ? 'Creating account...' : (<>Register <ArrowRight size={15} /></>)}
           </button>
         </form>
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
-          Already have an account? <Link to="/login" style={{ color: '#38bdf8', textDecoration: 'none' }}>Sign in</Link>
+        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem', fontWeight: 'bold' }}>
+          Already have an account? <Link to="/login" style={{ color: 'var(--violet)', textDecoration: 'none', borderBottom: '2px solid var(--violet)' }}>Sign in</Link>
         </div>
       </div>
     </div>

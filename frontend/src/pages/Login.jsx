@@ -42,8 +42,8 @@ export default function Login() {
             {loading ? 'Signing in...' : (<>Continue <ArrowRight size={15} /></>)}
           </button>
         </form>
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
-          Don't have an account? <Link to="/register" style={{ color: '#38bdf8', textDecoration: 'none' }}>Sign up</Link>
+        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem', fontWeight: 'bold' }}>
+          Don't have an account? <Link to="/register" style={{ color: 'var(--violet)', textDecoration: 'none', borderBottom: '2px solid var(--violet)' }}>Sign up</Link>
         </div>
       </div>
     </div>

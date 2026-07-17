@@ -5,9 +5,9 @@ import { Plus, MoreHorizontal, ArrowRight, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
 
 const COLS = [
-  { key: 'TODO',        label: 'To Do',       color: '#71717A' },
-  { key: 'IN_PROGRESS', label: 'In Progress',  color: '#38BDF8' },
-  { key: 'DONE',        label: 'Done',         color: '#10B981' },
+  { key: 'TODO',        label: 'To Do',       color: 'var(--amber)' },
+  { key: 'IN_PROGRESS', label: 'In Progress',  color: 'var(--sky)' },
+  { key: 'DONE',        label: 'Done',         color: 'var(--emerald)' },
 ];
 
 export default function Dashboard() {
