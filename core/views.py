@@ -97,3 +97,42 @@ class RegisterView(APIView):
             'access': str(refresh.access_token),
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
+
+class InviteMemberView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsOrganizationAdmin]
+
+    def post(self, request):
+        email = request.data.get('email')
+        role = request.data.get('role', 'MEMBER')
+        
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        org = request.user.current_organization
+        if not org:
+            return Response({'error': 'No active organization'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            target_user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error': 'User must register first before being invited.'}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Check if already a member
+        if OrganizationMember.objects.filter(organization=org, user=target_user).exists():
+            return Response({'error': 'User is already a member of this organization.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        member = OrganizationMember.objects.create(
+            organization=org,
+            user=target_user,
+            role=role
+        )
+        
+        # If user has no current organization, set it
+        if not target_user.current_organization:
+            target_user.current_organization = org
+            target_user.save()
+            
+        return Response({
+            'message': f'Successfully added {email} to {org.name}',
+            'member': OrganizationMemberSerializer(member).data
+        }, status=status.HTTP_201_CREATED)

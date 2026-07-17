@@ -1,10 +1,13 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Team from './pages/Team';
 import Settings from './pages/Settings';
+
+const queryClient = new QueryClient();
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('access_token');
@@ -13,36 +16,38 @@ function PrivateRoute({ children }) {
 
 export default function App() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route 
-          path="/dashboard" 
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/team" 
-          element={
-            <PrivateRoute>
-              <Team />
-            </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="/settings" 
-          element={
-            <PrivateRoute>
-              <Settings />
-            </PrivateRoute>
-          } 
-        />
-      </Routes>
-    </HashRouter>
+    <QueryClientProvider client={queryClient}>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/team" 
+            element={
+              <PrivateRoute>
+                <Team />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <PrivateRoute>
+                <Settings />
+              </PrivateRoute>
+            } 
+          />
+        </Routes>
+      </HashRouter>
+    </QueryClientProvider>
   );
 }

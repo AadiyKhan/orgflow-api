@@ -1,21 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api';
 import { UserPlus } from 'lucide-react';
 import Layout from '../components/Layout';
 
 export default function Team() {
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('MEMBER');
+  const [inviteError, setInviteError] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try { const r = await api.get('/members/'); setMembers(r.data.results || r.data); }
-      catch (e) { if (e.response?.status === 401) navigate('/login'); }
-      finally { setLoading(false); }
-    })();
-  }, [navigate]);
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
+      const { data } = await api.get('/members/');
+      return data.results || data;
+    }
+  });
+
+  const inviteMutation = useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.post('/auth/invite/', payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['members']);
+      setInviteModalOpen(false);
+      setInviteEmail('');
+      setInviteError(null);
+    },
+    onError: (err) => {
+      setInviteError(err.response?.data?.error || 'Failed to invite user');
+    }
+  });
+
+  const handleInvite = (e) => {
+    e.preventDefault();
+    setInviteError(null);
+    inviteMutation.mutate({ email: inviteEmail, role: inviteRole });
+  };
 
   const name = (m) => {
     const f = m.user_details?.first_name, l = m.user_details?.last_name;
@@ -28,10 +52,12 @@ export default function Team() {
         <div className="page-center">
           <div className="page-header">
             <h2 className="page-title">Members</h2>
-            <button className="btn btn-primary"><UserPlus size={14} /> Invite</button>
+            <button className="btn btn-primary" onClick={() => setInviteModalOpen(true)}>
+              <UserPlus size={14} /> Invite
+            </button>
           </div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center mt-4"><div className="spinner" /></div>
           ) : (
             <div className="card">
@@ -54,6 +80,48 @@ export default function Team() {
           )}
         </div>
       </div>
+
+      {inviteModalOpen && (
+        <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) setInviteModalOpen(false); }}>
+          <div className="modal">
+            <h3 className="modal-title">Invite Member</h3>
+            <p className="modal-desc">Add a new member to your organization.</p>
+            {inviteError && <div className="auth-error" style={{ marginBottom: '1rem' }}>{inviteError}</div>}
+            
+            <form onSubmit={handleInvite} className="flex-col gap-3">
+              <div>
+                <label>Email Address</label>
+                <input 
+                  autoFocus 
+                  type="email" 
+                  value={inviteEmail} 
+                  onChange={e => setInviteEmail(e.target.value)} 
+                  placeholder="colleague@example.com" 
+                  required 
+                />
+              </div>
+              <div>
+                <label>Role</label>
+                <select 
+                  value={inviteRole} 
+                  onChange={e => setInviteRole(e.target.value)}
+                  style={{ width: '100%', padding: '0.625rem', border: 'var(--border-width) solid #000', borderRadius: 'var(--r-md)', fontSize: '0.9375rem', fontWeight: '500' }}
+                >
+                  <option value="MEMBER">Member</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              
+              <div className="modal-footer" style={{ marginTop: '0.5rem' }}>
+                <button type="button" className="btn" onClick={() => setInviteModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={inviteMutation.isPending}>
+                  {inviteMutation.isPending ? 'Inviting...' : 'Send Invite'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
