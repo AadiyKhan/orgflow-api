@@ -128,7 +128,8 @@ class RequestPasswordResetView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
         # Link typically points to frontend
-        reset_link = f"http://localhost:5173/reset-password?uid={uid}&token={token}"
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+        reset_link = f"{frontend_url}/reset-password?uid={uid}&token={token}"
         
         send_mail(
             subject='Reset your OrgFlow Password',
@@ -193,7 +194,8 @@ class InviteMemberView(APIView):
         token = signer.sign_object({'email': email, 'org_id': str(org.id), 'role': role})
         
         # Send invite email
-        invite_url = f"http://localhost:5173/invite?token={token}"
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+        invite_url = f"{frontend_url}/invite?token={token}"
         msg = f"You have been invited to join the organization '{org.name}' on OrgFlow.\n\n"
         msg += f"Click the link below to accept or decline the invitation:\n{invite_url}\n\n"
         msg += "If you do not have an account, one will be created for you automatically."
