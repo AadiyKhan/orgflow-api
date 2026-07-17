@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Team from './pages/Team';
+import Settings from './pages/Settings';
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('access_token');
@@ -19,6 +21,22 @@ export default function App() {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/team" 
+          element={
+            <PrivateRoute>
+              <Team />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <PrivateRoute>
+              <Settings />
             </PrivateRoute>
           } 
         />
