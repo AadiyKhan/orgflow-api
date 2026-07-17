@@ -193,7 +193,7 @@ function TaskCard({ task, onStatusChange }) {
           </button>
           
           {showMenu && (
-            <div className="glass-panel" style={{ position: 'absolute', right: 0, top: '100%', padding: '0.5rem', zIndex: 50, minWidth: '150px' }}>
+            <div className="solid-dropdown" style={{ position: 'absolute', right: 0, top: '100%', padding: '0.5rem', zIndex: 50, minWidth: '150px' }}>
               <button 
                 onClick={() => { onStatusChange(task.id, nextStatus); setShowMenu(false); }} 
                 style={{ background: 'none', border: 'none', color: 'var(--text-primary)', padding: '0.5rem', width: '100%', textAlign: 'left', cursor: 'pointer', fontSize: '0.8125rem', borderRadius: '4px' }}

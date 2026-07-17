@@ -22,10 +22,10 @@ export default function Layout({ children, pageTitle }) {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="flex items-center gap-2" style={{ marginBottom: '2rem', padding: '0 0.5rem' }}>
-          <div style={{ width: '28px', height: '28px', background: 'var(--accent-primary)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '28px', height: '28px', background: 'var(--gradient-vibe)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
              <Layers size={16} color="white" />
           </div>
-          <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '1rem', letterSpacing: '-0.02em' }}>OrgFlow</span>
+          <span className="text-gradient" style={{ fontWeight: '700', fontSize: '1.25rem', letterSpacing: '-0.02em' }}>OrgFlow</span>
         </div>
 
         <nav className="flex-col" style={{ flex: 1, gap: '0.25rem' }}>

@@ -38,7 +38,7 @@ export default function Login() {
                 <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
              </svg>
           </div>
-          <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', letterSpacing: '-0.02em', color: '#fff' }}>Welcome to OrgFlow</h2>
+          <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem', letterSpacing: '-0.02em', fontWeight: '700' }}>Welcome to OrgFlow</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>Enter your details to access your workspace</p>
         </div>
         
