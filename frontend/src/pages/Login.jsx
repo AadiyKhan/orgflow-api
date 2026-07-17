@@ -27,7 +27,7 @@ export default function Login() {
   };
 
   return (
-    <div className="mesh-bg flex items-center justify-center" style={{ minHeight: '100vh', width: '100%' }}>
+    <div className="mesh-bg" style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="glass-panel" style={{ width: '100%', maxWidth: '420px', padding: '3rem', position: 'relative', zIndex: 10 }}>
         
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>

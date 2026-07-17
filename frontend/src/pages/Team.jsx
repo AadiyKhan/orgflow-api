@@ -45,7 +45,9 @@ export default function Team() {
                     </div>
                     <div>
                       <h4 style={{ fontSize: '0.9375rem', fontWeight: '500', color: 'var(--text-primary)', margin: 0 }}>
-                        {member.user_details?.first_name} {member.user_details?.last_name}
+                        {member.user_details?.first_name || member.user_details?.last_name
+                          ? `${member.user_details.first_name} ${member.user_details.last_name}`.trim()
+                          : member.user_details?.email?.split('@')[0]}
                       </h4>
                       <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>
                         {member.user_details?.email}
