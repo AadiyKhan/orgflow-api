@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { CheckCircle2, Clock, Circle, Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, MoreHorizontal, Circle, ArrowRight, CheckCircle2, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
+
+const STATUS_CONFIG = {
+  TODO: { label: 'To Do', color: '#71717A' },
+  IN_PROGRESS: { label: 'In Progress', color: '#3B82F6' },
+  DONE: { label: 'Done', color: '#22C55E' },
+};
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
@@ -10,10 +16,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskStatus, setNewTaskStatus] = useState('TODO');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStatus, setModalStatus] = useState('TODO');
+  const [newTitle, setNewTitle] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -26,9 +31,7 @@ export default function Dashboard() {
         setTasks(tasksRes.data.results || tasksRes.data);
         setProjects(projectsRes.data.results || projectsRes.data);
       } catch (err) {
-        if (err.response?.status === 401) {
-          navigate('/login');
-        }
+        if (err.response?.status === 401) navigate('/login');
       } finally {
         setLoading(false);
       }
@@ -36,130 +39,93 @@ export default function Dashboard() {
     fetchData();
   }, [navigate]);
 
-  const handleOpenModal = (status) => {
-    setNewTaskStatus(status);
-    setNewTaskTitle('');
-    setIsModalOpen(true);
+  const openModal = (status) => {
+    setModalStatus(status);
+    setNewTitle('');
+    setModalOpen(true);
   };
 
-  const handleCreateTask = async (e) => {
+  const createTask = async (e) => {
     e.preventDefault();
-    if (!projects.length) return alert('No projects exist in this organization.');
+    if (!projects.length) return;
     setSubmitting(true);
     try {
-      const response = await api.post('/tasks/', {
-        title: newTaskTitle,
-        status: newTaskStatus,
-        project: projects[0].id // Default to first project
-      });
-      setTasks([response.data, ...tasks]);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to create task');
-    } finally {
-      setSubmitting(false);
-    }
+      const res = await api.post('/tasks/', { title: newTitle, status: modalStatus, project: projects[0].id });
+      setTasks([res.data, ...tasks]);
+      setModalOpen(false);
+    } catch { /* silently fail */ }
+    finally { setSubmitting(false); }
   };
 
-  const handleStatusChange = async (taskId, newStatus) => {
+  const changeStatus = async (taskId, newStatus) => {
+    setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
     try {
-      // Optimistic update
-      setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
       await api.patch(`/tasks/${taskId}/`, { status: newStatus });
-    } catch (err) {
-      console.error(err);
-      alert('Failed to update task');
-      // Revert if failed by refetching
-      const response = await api.get('/tasks/');
-      setTasks(response.data.results || response.data);
+    } catch {
+      const res = await api.get('/tasks/');
+      setTasks(res.data.results || res.data);
     }
   };
 
-  const todoTasks = tasks.filter(t => t.status === 'TODO');
-  const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS');
-  const doneTasks = tasks.filter(t => t.status === 'DONE');
+  const deleteTask = async (taskId) => {
+    setTasks(tasks.filter(t => t.id !== taskId));
+    try {
+      await api.delete(`/tasks/${taskId}/`);
+    } catch {
+      const res = await api.get('/tasks/');
+      setTasks(res.data.results || res.data);
+    }
+  };
+
+  const columns = ['TODO', 'IN_PROGRESS', 'DONE'];
 
   return (
-    <Layout pageTitle={projects[0]?.name || "Dashboard"}>
+    <Layout pageTitle={projects[0]?.name || 'Board'}>
       {loading ? (
-        <div className="flex items-center justify-center" style={{ flex: 1 }}>
-          <div style={{ width: '24px', height: '24px', border: '2px solid var(--glass-border)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-        </div>
+        <div className="flex items-center justify-center" style={{ flex: 1 }}><div className="spinner"></div></div>
       ) : (
-        <div className="kanban-container">
-          
-          {/* To Do Column */}
-          <div className="kanban-column">
-            <div className="kanban-header flex justify-between">
-              <div className="flex items-center gap-2">
-                <Circle size={16} color="var(--todo-color)" /> To Do <span className="kanban-count">{todoTasks.length}</span>
+        <div className="kanban">
+          {columns.map(status => {
+            const cfg = STATUS_CONFIG[status];
+            const colTasks = tasks.filter(t => t.status === status);
+            return (
+              <div className="kanban-col" key={status}>
+                <div className="kanban-col-header">
+                  <div className="kanban-col-label">
+                    <span className="kanban-col-dot" style={{ background: cfg.color }}></span>
+                    {cfg.label}
+                    <span className="kanban-col-count">{colTasks.length}</span>
+                  </div>
+                  <button className="kanban-col-add" onClick={() => openModal(status)}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="kanban-col-body">
+                  {colTasks.map(task => (
+                    <TaskCard key={task.id} task={task} onChangeStatus={changeStatus} onDelete={deleteTask} />
+                  ))}
+                </div>
               </div>
-              <button onClick={() => handleOpenModal('TODO')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="kanban-body">
-              {todoTasks.map(task => <TaskCard key={task.id} task={task} onStatusChange={handleStatusChange} />)}
-            </div>
-          </div>
-
-          {/* In Progress Column */}
-          <div className="kanban-column">
-            <div className="kanban-header flex justify-between">
-              <div className="flex items-center gap-2">
-                <Clock size={16} color="var(--in-progress-color)" /> In Progress <span className="kanban-count">{inProgressTasks.length}</span>
-              </div>
-              <button onClick={() => handleOpenModal('IN_PROGRESS')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="kanban-body">
-              {inProgressTasks.map(task => <TaskCard key={task.id} task={task} onStatusChange={handleStatusChange} />)}
-            </div>
-          </div>
-
-          {/* Done Column */}
-          <div className="kanban-column">
-            <div className="kanban-header flex justify-between">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} color="var(--done-color)" /> Done <span className="kanban-count">{doneTasks.length}</span>
-              </div>
-              <button onClick={() => handleOpenModal('DONE')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="kanban-body">
-              {doneTasks.map(task => <TaskCard key={task.id} task={task} onStatusChange={handleStatusChange} />)}
-            </div>
-          </div>
-
+            );
+          })}
         </div>
       )}
 
-      {/* Task Creation Modal */}
-      {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <div className="glass-panel" style={{ width: '400px', padding: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.125rem' }}>Create Task</h3>
-            <form onSubmit={handleCreateTask} className="flex-col gap-4">
+      {/* Create Task Modal */}
+      {modalOpen && (
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
+          <div className="modal-card">
+            <h3 className="modal-title">New task</h3>
+            <p className="modal-desc">Adding to {STATUS_CONFIG[modalStatus].label}</p>
+            <form onSubmit={createTask}>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Task Title</label>
-                <input 
-                  autoFocus
-                  type="text" 
-                  value={newTaskTitle} 
-                  onChange={(e) => setNewTaskTitle(e.target.value)} 
-                  placeholder="e.g. Implement redesign" 
-                  required 
-                />
+                <label>Title</label>
+                <input autoFocus type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="What needs to be done?" required />
               </div>
-              <div className="flex justify-between mt-6">
-                <button type="button" className="btn" onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }}>
-                  Cancel
-                </button>
+              <div className="modal-footer">
+                <button type="button" className="btn" onClick={() => setModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Creating...' : 'Create Task'}
+                  {submitting ? 'Creating...' : 'Create'}
                 </button>
               </div>
             </form>
@@ -170,59 +136,44 @@ export default function Dashboard() {
   );
 }
 
-function TaskCard({ task, onStatusChange }) {
-  const [showMenu, setShowMenu] = useState(false);
+function TaskCard({ task, onChangeStatus, onDelete }) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const initials = task.assignee_details 
-    ? `${task.assignee_details.first_name?.[0] || ''}${task.assignee_details.last_name?.[0] || ''}`.toUpperCase()
-    : 'U';
-    
-  const displayName = task.assignee_details?.first_name 
-    ? `${task.assignee_details.first_name} ${task.assignee_details.last_name}`
-    : task.assignee_details?.email?.split('@')[0] || 'Unassigned';
+  const initials = task.assignee_details
+    ? `${task.assignee_details.first_name?.[0] || ''}${task.assignee_details.last_name?.[0] || ''}`.toUpperCase() || task.assignee_details.email?.[0]?.toUpperCase()
+    : null;
 
-  const nextStatus = task.status === 'TODO' ? 'IN_PROGRESS' : task.status === 'IN_PROGRESS' ? 'DONE' : 'TODO';
+  const otherStatuses = ['TODO', 'IN_PROGRESS', 'DONE'].filter(s => s !== task.status);
 
   return (
-    <div className="task-card flex-col" onMouseLeave={() => setShowMenu(false)}>
-      <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
-        <div className="task-id">ORG-{task.id?.substring(0,4).toUpperCase() || '0000'}</div>
+    <div className="task-card" onMouseLeave={() => setMenuOpen(false)}>
+      <div className="task-card-header">
+        <span className="task-card-id">ORG-{task.id?.substring(0, 4).toUpperCase()}</span>
         <div style={{ position: 'relative' }}>
-          <button onClick={() => setShowMenu(!showMenu)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}>
+          <button className="task-card-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
             <MoreHorizontal size={14} />
           </button>
-          
-          {showMenu && (
-            <div className="solid-dropdown" style={{ position: 'absolute', right: 0, top: '100%', padding: '0.5rem', zIndex: 50, minWidth: '150px' }}>
-              <button 
-                onClick={() => { onStatusChange(task.id, nextStatus); setShowMenu(false); }} 
-                style={{ background: 'none', border: 'none', color: 'var(--text-primary)', padding: '0.5rem', width: '100%', textAlign: 'left', cursor: 'pointer', fontSize: '0.8125rem', borderRadius: '4px' }}
-                onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
-                onMouseOut={(e) => e.target.style.background = 'none'}
-              >
-                Move to {nextStatus.replace('_', ' ')}
+          {menuOpen && (
+            <div className="dropdown-menu">
+              {otherStatuses.map(s => (
+                <button key={s} className="dropdown-item" onClick={() => { onChangeStatus(task.id, s); setMenuOpen(false); }}>
+                  <ArrowRight size={14} />
+                  Move to {STATUS_CONFIG[s].label}
+                </button>
+              ))}
+              <div className="dropdown-separator"></div>
+              <button className="dropdown-item" style={{ color: 'var(--red)' }} onClick={() => { onDelete(task.id); setMenuOpen(false); }}>
+                <Trash2 size={14} />
+                Delete
               </button>
             </div>
           )}
         </div>
       </div>
-      
-      <h4 className="task-title">{task.title}</h4>
-      
-      <div className="task-footer">
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <span style={{ padding: '2px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: '500' }}>
-            ENGINEERING
-          </span>
-        </div>
-        
-        {task.assignee_details && (
-          <div className="flex items-center gap-2">
-            <div className="avatar" title={displayName}>
-              {initials || displayName[0].toUpperCase()}
-            </div>
-          </div>
-        )}
+      <div className="task-card-title">{task.title}</div>
+      <div className="task-card-footer">
+        <span className="task-card-tag">Engineering</span>
+        {initials && <div className="avatar">{initials}</div>}
       </div>
     </div>
   );

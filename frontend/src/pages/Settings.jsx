@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import Layout from '../components/Layout';
-import { Shield, Key, Bell, Palette, User as UserIcon, Check, Copy } from 'lucide-react';
+import { User, Shield, Key, Bell, Palette, Copy, CheckCircle2 } from 'lucide-react';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -10,40 +10,33 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
-  // UI state
   const [toast, setToast] = useState(null);
-  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeyModal, setApiKeyModal] = useState(false);
   const [apiKey, setApiKey] = useState('');
 
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const response = await api.get('/users/me/');
-        setUser(response.data);
-        setFirstName(response.data.first_name || '');
-        setLastName(response.data.last_name || '');
-      } catch (err) {
-        console.error(err);
-      }
+        const res = await api.get('/users/me/');
+        setUser(res.data);
+        setFirstName(res.data.first_name || '');
+        setLastName(res.data.last_name || '');
+      } catch (err) { console.error(err); }
     };
     fetchMe();
   }, []);
 
-  const handleUpdateProfile = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
     setMessage('');
     try {
-      await api.patch(`/users/${user.id}/`, {
-        first_name: firstName,
-        last_name: lastName
-      });
-      setMessage('Profile updated successfully!');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
-      console.error(err);
-      setMessage('Failed to update profile.');
+      await api.patch(`/users/${user.id}/`, { first_name: firstName, last_name: lastName });
+      setMessage('Saved');
+      setTimeout(() => setMessage(''), 2500);
+    } catch {
+      setMessage('Error');
     } finally {
       setSaving(false);
     }
@@ -51,140 +44,129 @@ export default function Settings() {
 
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), 2500);
   };
 
   const generateApiKey = () => {
-    const randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    setApiKey(`org_live_${randomString}`);
-    setShowApiKey(true);
+    const rand = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    setApiKey(`org_live_${rand}`);
+    setApiKeyModal(true);
   };
 
-  const copyToClipboard = () => {
+  const copyKey = () => {
     navigator.clipboard.writeText(apiKey);
-    showToast('API Key copied to clipboard!');
+    showToast('Copied to clipboard');
   };
+
+  const settingsRows = [
+    { icon: Shield, iconBg: 'var(--blue-muted)', iconColor: 'var(--blue)', title: 'Security', desc: 'Manage password, two-factor authentication, and sessions.', action: () => showToast('Security settings are up to date'), actionLabel: 'Manage' },
+    { icon: Palette, iconBg: 'var(--accent-muted)', iconColor: 'var(--accent)', title: 'Appearance', desc: 'Theme preferences synced with your system settings.', action: () => showToast('Appearance synced with system'), actionLabel: 'Manage' },
+    { icon: Bell, iconBg: 'var(--green-muted)', iconColor: 'var(--green)', title: 'Notifications', desc: 'Configure email digests and push notification preferences.', action: () => showToast('Notification preferences saved'), actionLabel: 'Manage' },
+  ];
 
   return (
-    <Layout pageTitle="Workspace Settings">
-      <div style={{ padding: '2.5rem', flex: 1, overflowY: 'auto', position: 'relative' }}>
-        
-        {/* Toast Notification */}
-        {toast && (
-          <div style={{ 
-            position: 'fixed', bottom: '2rem', right: '2rem', 
-            background: 'var(--gradient-vibe)', color: '#fff', 
-            padding: '0.75rem 1.5rem', borderRadius: '8px', 
-            boxShadow: '0 8px 32px var(--accent-glow)', 
-            fontWeight: '500', zIndex: 100,
-            animation: 'float 2s ease-in-out infinite'
-          }}>
-            {toast}
-          </div>
-        )}
+    <Layout pageTitle="Settings">
+      <div className="page-container">
+        <div className="page-inner">
 
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '2rem' }}>General Settings</h2>
-          
-          <div className="flex-col gap-4">
-
-            {/* Profile Settings */}
-            <div className="glass-card" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
-              <div className="flex gap-4 items-start mb-6">
-                <UserIcon size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
+          {/* Profile Section */}
+          <h2 className="page-title mb-4">Profile</h2>
+          <div className="card" style={{ marginBottom: '2rem' }}>
+            <div style={{ padding: '1.25rem' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="card-row-icon" style={{ background: 'var(--accent-muted)' }}>
+                  <User size={18} color="var(--accent)" />
+                </div>
                 <div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: 0 }}>My Profile</h4>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Update your personal details.</p>
+                  <div className="card-row-title">Personal information</div>
+                  <div className="card-row-desc">Update your name. This will be visible to your team.</div>
                 </div>
               </div>
-              
-              <form onSubmit={handleUpdateProfile} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <form onSubmit={handleSave} className="form-grid">
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>First Name</label>
+                  <label>First name</label>
                   <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jane" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Last Name</label>
+                  <label>Last name</label>
                   <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Doe" />
                 </div>
-                <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
-                  {message && <span style={{ fontSize: '0.8125rem', color: message.includes('Failed') ? 'var(--danger)' : 'var(--success)' }}>{message}</span>}
+                <div className="form-field-full flex justify-end items-center gap-2 mt-1">
+                  {message && (
+                    <span className="flex items-center gap-1" style={{ fontSize: '0.8125rem', color: message === 'Saved' ? 'var(--green)' : 'var(--red)' }}>
+                      {message === 'Saved' && <CheckCircle2 size={14} />}
+                      {message === 'Saved' ? 'Profile saved' : 'Failed to save'}
+                    </span>
+                  )}
                   <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Profile'}
+                    {saving ? 'Saving...' : 'Save changes'}
                   </button>
                 </div>
               </form>
             </div>
-            
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
-              <div className="flex gap-4">
-                <Shield size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
-                <div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Security & Authentication</h4>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Manage your password, 2FA, and active sessions.</p>
-                </div>
-              </div>
-              <button onClick={() => showToast('Security settings are optimal.')} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}>Manage</button>
-            </div>
-
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
-              <div className="flex gap-4">
-                <Palette size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
-                <div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Appearance</h4>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Customize theme, density, and accessibility options.</p>
-                </div>
-              </div>
-              <button onClick={() => showToast('Appearance synced with system.')} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}>Manage</button>
-            </div>
-
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
-              <div className="flex gap-4">
-                <Bell size={20} color="var(--accent-primary)" style={{ marginTop: '2px' }} />
-                <div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>Notifications</h4>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Configure email and push notification preferences.</p>
-                </div>
-              </div>
-              <button onClick={() => showToast('Notifications configured.')} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}>Manage</button>
-            </div>
-            
-            <div className="glass-card flex justify-between items-center" style={{ padding: '1.5rem', borderRadius: '12px', background: 'var(--bg-card)', borderLeft: '3px solid var(--danger)' }}>
-              <div className="flex gap-4">
-                <Key size={20} color="var(--danger)" style={{ marginTop: '2px' }} />
-                <div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)', margin: '0 0 0.25rem 0' }}>API Keys</h4>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>Generate API tokens for programmatic access.</p>
-                </div>
-              </div>
-              <button onClick={generateApiKey} className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: 'rgba(244, 63, 94, 0.1)', color: 'var(--danger)' }}>Generate Token</button>
-            </div>
-
           </div>
+
+          {/* General Settings */}
+          <h2 className="page-title mb-4">General</h2>
+          <div className="card" style={{ marginBottom: '2rem' }}>
+            {settingsRows.map((row, i) => (
+              <div key={i} className="card-row">
+                <div className="card-row-info">
+                  <div className="card-row-icon" style={{ background: row.iconBg }}>
+                    <row.icon size={18} color={row.iconColor} />
+                  </div>
+                  <div>
+                    <div className="card-row-title">{row.title}</div>
+                    <div className="card-row-desc">{row.desc}</div>
+                  </div>
+                </div>
+                <button className="btn" onClick={row.action}>{row.actionLabel}</button>
+              </div>
+            ))}
+          </div>
+
+          {/* API Keys */}
+          <h2 className="page-title mb-4">Developer</h2>
+          <div className="card">
+            <div className="card-row">
+              <div className="card-row-info">
+                <div className="card-row-icon" style={{ background: 'var(--red-muted)' }}>
+                  <Key size={18} color="var(--red)" />
+                </div>
+                <div>
+                  <div className="card-row-title">API Keys</div>
+                  <div className="card-row-desc">Generate tokens for programmatic access to the OrgFlow API.</div>
+                </div>
+              </div>
+              <button className="btn btn-danger" onClick={generateApiKey}>Generate</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
+      {/* Toast */}
+      {toast && (
+        <div className="toast">
+          <CheckCircle2 size={14} className="toast-icon" />
+          {toast}
+        </div>
+      )}
+
       {/* API Key Modal */}
-      {showApiKey && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <div className="glass-panel" style={{ width: '450px', padding: '2.5rem' }}>
-            <h3 className="text-gradient" style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>New API Token Generated</h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              Make sure to copy your API key now. You won't be able to see it again!
-            </p>
-            
-            <div className="flex items-center justify-between" style={{ background: '#0A0A0B', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-              <code style={{ color: 'var(--accent-primary)', fontSize: '0.875rem', letterSpacing: '0.05em' }}>{apiKey}</code>
-              <button onClick={copyToClipboard} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>
-                <Copy size={16} />
+      {apiKeyModal && (
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setApiKeyModal(false); }}>
+          <div className="modal-card">
+            <h3 className="modal-title">API token created</h3>
+            <p className="modal-desc">Copy this token now. It will not be shown again.</p>
+            <div className="code-block">
+              <code>{apiKey}</code>
+              <button className="btn-ghost" onClick={copyKey} style={{ cursor: 'pointer' }}>
+                <Copy size={14} />
               </button>
             </div>
-
-            <div className="flex justify-end mt-6">
-              <button type="button" className="btn btn-primary" onClick={() => setShowApiKey(false)}>
-                I have copied the key
-              </button>
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={() => setApiKeyModal(false)}>Done</button>
             </div>
           </div>
         </div>

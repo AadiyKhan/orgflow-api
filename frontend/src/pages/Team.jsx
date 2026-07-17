@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import { UserPlus } from 'lucide-react';
 import Layout from '../components/Layout';
 
 export default function Team() {
@@ -22,50 +23,50 @@ export default function Team() {
     fetchMembers();
   }, [navigate]);
 
+  const getName = (m) => {
+    const first = m.user_details?.first_name;
+    const last = m.user_details?.last_name;
+    if (first || last) return `${first || ''} ${last || ''}`.trim();
+    return m.user_details?.email?.split('@')[0] || 'Unknown';
+  };
+
+  const getInitial = (m) => {
+    const name = getName(m);
+    return name[0]?.toUpperCase() || '?';
+  };
+
   return (
-    <Layout pageTitle="Team Members">
-      <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '500' }}>Organization Members</h2>
-            <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
-              Invite Member
-            </button>
+    <Layout pageTitle="Team">
+      <div className="page-container">
+        <div className="page-inner">
+          <div className="page-header">
+            <h2 className="page-title">Members</h2>
+            <button className="btn btn-primary"><UserPlus size={14} /> Invite</button>
           </div>
-          
+
           {loading ? (
-             <p style={{ color: 'var(--text-secondary)' }}>Loading members...</p>
+            <div className="flex justify-center mt-4"><div className="spinner"></div></div>
           ) : (
-            <div className="flex-col gap-2">
-              {members.map(member => (
-                <div key={member.id} className="glass-card flex items-center justify-between" style={{ padding: '1rem 1.5rem', borderRadius: '8px' }}>
-                  <div className="flex items-center gap-4">
-                    <div className="avatar" style={{ width: '36px', height: '36px', fontSize: '1rem' }}>
-                      {member.user_details?.first_name?.[0]?.toUpperCase() || member.user_details?.email?.[0]?.toUpperCase() || 'U'}
-                    </div>
+            <div className="card">
+              {members.map((member, i) => (
+                <div key={member.id} className="member-row" style={i > 0 ? { borderTop: '1px solid var(--border)' } : {}}>
+                  <div className="member-info">
+                    <div className="avatar avatar-lg">{getInitial(member)}</div>
                     <div>
-                      <h4 style={{ fontSize: '0.9375rem', fontWeight: '500', color: 'var(--text-primary)', margin: 0 }}>
-                        {member.user_details?.first_name || member.user_details?.last_name
-                          ? `${member.user_details.first_name} ${member.user_details.last_name}`.trim()
-                          : member.user_details?.email?.split('@')[0]}
-                      </h4>
-                      <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0 }}>
-                        {member.user_details?.email}
-                      </p>
+                      <div className="member-name">{getName(member)}</div>
+                      <div className="member-email">{member.user_details?.email}</div>
                     </div>
                   </div>
-                  <span style={{ 
-                    padding: '4px 10px', 
-                    background: member.role === 'ADMIN' ? 'rgba(229, 72, 77, 0.1)' : 'rgba(255,255,255,0.05)', 
-                    color: member.role === 'ADMIN' ? 'var(--danger)' : 'var(--text-secondary)',
-                    borderRadius: '4px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: '500' 
-                  }}>
+                  <span className={`badge ${member.role === 'ADMIN' ? 'badge-admin' : 'badge-member'}`}>
                     {member.role}
                   </span>
                 </div>
               ))}
+              {members.length === 0 && (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No team members found.
+                </div>
+              )}
             </div>
           )}
         </div>
