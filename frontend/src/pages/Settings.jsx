@@ -24,7 +24,7 @@ export default function Settings() {
     e.preventDefault();
     if (!user) return;
     setSaving(true); setMsg('');
-    try { await api.patch(`/users/${user.id}/`, { first_name: fn, last_name: ln }); setMsg('ok'); setTimeout(() => setMsg(''), 2500); }
+    try { await api.patch('/users/me/', { first_name: fn, last_name: ln }); setMsg('ok'); setTimeout(() => setMsg(''), 2500); }
     catch { setMsg('err'); }
     finally { setSaving(false); }
   };
@@ -74,9 +74,18 @@ export default function Settings() {
           {/* General */}
           <div className="section-label mb-2">General</div>
           <div className="card mb-4">
+            <div className="card-row">
+              <div className="card-row-left">
+                <div className="card-icon" style={{ background: 'var(--violet-muted)' }}><Palette size={16} color="var(--violet)" /></div>
+                <div><div className="card-label">Appearance</div><div className="card-desc">Toggle Dark/Light mode theme.</div></div>
+              </div>
+              <button className="btn" onClick={() => {
+                document.documentElement.classList.toggle('dark');
+                fire('Theme updated');
+              }}>Toggle</button>
+            </div>
             {[
               { icon: Shield, bg: 'var(--sky-muted)', ic: 'var(--sky)', t: 'Security', d: 'Password, two-factor authentication, sessions.', a: () => fire('Security settings are up to date') },
-              { icon: Palette, bg: 'var(--violet-muted)', ic: 'var(--violet)', t: 'Appearance', d: 'Theme synced with your system preferences.', a: () => fire('Appearance synced') },
               { icon: Bell, bg: 'var(--emerald-muted)', ic: 'var(--emerald)', t: 'Notifications', d: 'Email digests and push notification preferences.', a: () => fire('Preferences saved') },
             ].map((r, i) => (
               <div key={i} className="card-row">

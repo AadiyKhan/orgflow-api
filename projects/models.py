@@ -40,6 +40,7 @@ class Task(TenantModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TODO')
+    order = models.IntegerField(default=0)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL, 

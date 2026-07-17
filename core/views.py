@@ -14,9 +14,15 @@ class UserViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.Upd
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
         
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get', 'patch', 'put'])
     def me(self, request):
-        serializer = self.get_serializer(request.user)
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        
+        serializer = self.get_serializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
         
     @action(detail=False, methods=['post'])

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api';
 import { Plus, MoreHorizontal, ArrowRight, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
-import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -36,7 +36,7 @@ export default function Dashboard() {
     queryFn: async () => {
       if (!activeProject?.id) return [];
       const { data } = await api.get(`/tasks/?project=${activeProject.id}`);
-      return data.results || data;
+      return (data.results || data).sort((a,b) => a.order - b.order);
     },
     enabled: !!activeProject?.id
   });
@@ -66,7 +66,8 @@ export default function Dashboard() {
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
   );
 
   const handleDragStart = (event) => {
@@ -82,11 +83,33 @@ export default function Dashboard() {
     const activeTask = tasks.find(t => t.id === active.id);
     const overCol = COLS.find(c => c.key === over.id);
     const overTask = tasks.find(t => t.id === over.id);
-
     const newStatus = overCol ? overCol.key : (overTask ? overTask.status : activeTask.status);
     
-    if (activeTask.status !== newStatus) {
-      updateTaskMut.mutate({ id: activeTask.id, status: newStatus });
+    if (activeTask.status !== newStatus || (overTask && activeTask.id !== overTask.id)) {
+      let colTasks = tasks.filter(t => t.status === newStatus);
+      if (activeTask.status === newStatus) {
+        const oldIdx = colTasks.findIndex(t => t.id === activeTask.id);
+        const newIdx = colTasks.findIndex(t => t.id === overTask.id);
+        colTasks = arrayMove(colTasks, oldIdx, newIdx);
+      } else {
+        const insertIdx = overTask ? colTasks.findIndex(t => t.id === overTask.id) : colTasks.length;
+        colTasks.splice(insertIdx, 0, { ...activeTask, status: newStatus });
+      }
+
+      const updates = colTasks.map((t, idx) => ({ ...t, order: idx }));
+      
+      queryClient.setQueryData(['tasks', activeProject?.id], old => old.map(t => {
+        const updated = updates.find(u => u.id === t.id);
+        return updated ? updated : t;
+      }));
+
+      const activeUpdate = updates.find(u => u.id === activeTask.id);
+      updateTaskMut.mutate({ id: activeTask.id, status: newStatus, order: activeUpdate.order });
+      
+      // Fire and forget update for other affected tasks to keep order synced
+      updates.forEach(u => {
+        if (u.id !== activeTask.id) api.patch(`/tasks/${u.id}/`, { order: u.order }).catch(()=>{});
+      });
     }
   };
 

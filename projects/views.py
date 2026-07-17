@@ -29,8 +29,8 @@ class TaskViewSet(TenantScopedViewSet):
     serializer_class = TaskSerializer
     filterset_fields = ['status', 'project', 'assignee']
     search_fields = ['title', 'description']
-    ordering_fields = ['title', 'created_at', 'status']
-    ordering = ['-created_at']
+    ordering_fields = ['title', 'created_at', 'status', 'order']
+    ordering = ['order', '-created_at']
 
     def get_queryset(self):
         # Apply tenant scoping from base class

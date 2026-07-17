@@ -7,47 +7,54 @@
   /* Surfaces */
   --surface-0: #F6F5F0; /* Off-white retro background */
   --surface-1: #FFFFFF; /* Pure white for cards */
-  --surface-2: #FFF1F1; /* Light red tint for secondary elements */
-  --surface-3: #FFDADA;
+  --bg-color: #fafafa;
+  --bg-pattern: radial-gradient(#d4d4d8 1px, transparent 1px);
+  --card-bg: #ffffff;
+  --text-main: #000000;
+  --text-secondary: #3f3f46;
+  --text-tertiary: #71717a;
 
-  /* Borders & Shadows */
-  --border-subtle: #000000;
-  --border-default: #000000;
-  --border-hover: #000000;
-  --border-focus: #000000;
-  --border-width: 3px;
+  --violet: #FF2A2A; /* Now a Gen-Z Red */
+  --violet-muted: #ffe5e5;
+  --violet-hover: #e01f1f;
+  
+  --sky: #00E5FF; /* Cyan */
+  --sky-muted: #e0fafe;
+  
+  --emerald: #00D37F; /* Neon Green */
+  --emerald-muted: #dcfce7;
+  
+  --amber: #FFD700; /* Yellow */
+  --amber-muted: #fef9c3;
+  
+  --rose: #f43f5e;
+  --rose-muted: #ffe4e6;
+  --rose-hover: #e11d48;
 
-  /* Text */
-  --text-primary: #000000;
-  --text-secondary: #222222;
-  --text-tertiary: #444444;
+  --border-color: #000000;
+  --border-width: 2px;
+  
+  --r-sm: 0px;
+  --r-md: 0px;
+  --r-lg: 0px;
+  --r-full: 9999px;
 
-  /* Core Accent: NEON / BRUTAL RED */
-  --violet: #FF2A2A; 
-  --violet-hover: #E60000;
-  --violet-muted: #FFDADA;
-  --violet-glow: #000000; /* Replaced glow with hard shadow color */
-
-  /* Semantic colors */
-  --rose: #FF2A2A;
-  --rose-muted: #FFDADA;
-  --emerald: #00D37F;
-  --emerald-muted: #C1FFE2;
-  --sky: #00E5FF;
-  --sky-muted: #D1FAFF;
-  --amber: #FFD700;
-  --amber-muted: #FFF5C2;
-
-  /* Radii */
-  --r-sm: 4px;
-  --r-md: 8px;
-  --r-lg: 12px;
-
-  /* Shadows - Hard brutalist style */
   --shadow-sm: 2px 2px 0px #000;
   --shadow-md: 4px 4px 0px #000;
   --shadow-lg: 6px 6px 0px #000;
   --shadow-glow: none;
+}
+
+html.dark {
+  --bg-color: #111111;
+  --bg-pattern: radial-gradient(#333 1px, transparent 1px);
+  --card-bg: #1c1c1c;
+  --text-main: #ffffff;
+  --text-secondary: #a1a1aa;
+  --border-color: #FF2A2A;
+  --shadow-sm: 2px 2px 0px #FF2A2A;
+  --shadow-md: 4px 4px 0px #FF2A2A;
+  --shadow-lg: 6px 6px 0px #FF2A2A;
 }
 
 /* ═══════════════════════════════════════════════

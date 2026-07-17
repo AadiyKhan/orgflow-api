@@ -42,8 +42,8 @@ export default function Team() {
   };
 
   const name = (m) => {
-    const f = m.user_details?.first_name, l = m.user_details?.last_name;
-    return (f || l) ? `${f || ''} ${l || ''}`.trim() : m.user_details?.email?.split('@')[0] || 'Unknown';
+    const f = m.user?.first_name, l = m.user?.last_name;
+    return (f || l) ? `${f || ''} ${l || ''}`.trim() : m.user?.email?.split('@')[0] || 'Unknown';
   };
 
   return (
@@ -67,7 +67,7 @@ export default function Team() {
                     <div className="avatar avatar-md">{name(m)[0]?.toUpperCase()}</div>
                     <div>
                       <div className="member-name">{name(m)}</div>
-                      <div className="member-email">{m.user_details?.email}</div>
+                      <div className="member-email">{m.user?.email}</div>
                     </div>
                   </div>
                   <span className={`badge ${m.role === 'ADMIN' ? 'badge-admin' : 'badge-member'}`}>{m.role}</span>
