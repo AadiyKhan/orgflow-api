@@ -121,7 +121,7 @@ class InviteMemberView(APIView):
         try:
             target_user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({'error': 'User must register first before being invited.'}, status=status.HTTP_404_NOT_FOUND)
+            target_user = User.objects.create_user(email=email, password='password123')
             
         # Check if already a member
         if OrganizationMember.objects.filter(organization=org, user=target_user).exists():

@@ -92,7 +92,6 @@ export default function Settings() {
                   document.documentElement.classList.toggle('dark');
                 });
                 transition.ready.then(() => {
-                  const isDark = document.documentElement.classList.contains('dark');
                   document.documentElement.animate(
                     {
                       clipPath: [
@@ -103,7 +102,7 @@ export default function Settings() {
                     {
                       duration: 500,
                       easing: 'ease-in-out',
-                      pseudoElement: isDark ? '::view-transition-new(root)' : '::view-transition-old(root)',
+                      pseudoElement: '::view-transition-new(root)',
                     }
                   );
                 });

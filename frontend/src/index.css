@@ -46,27 +46,27 @@
 }
 
 html.dark {
-  --surface-0: #1a1614;
-  --surface-1: #241e1c;
-  --surface-2: #362d29;
-  --bg-color: #1a1614;
-  --bg-pattern: radial-gradient(#3a2e2a 1px, transparent 1px);
-  --card-bg: #241e1c;
-  --text-main: #fcf8f5;
-  --text-primary: #fcf8f5;
-  --text-secondary: #c9bcae;
-  --text-tertiary: #8f8278;
+  --surface-0: #0a0a0a;
+  --surface-1: #171717;
+  --surface-2: #262626;
+  --bg-color: #0a0a0a;
+  --bg-pattern: radial-gradient(#262626 1px, transparent 1px);
+  --card-bg: #171717;
+  --text-main: #f5f5f5;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
   
-  --border-default: #4f3a2c;
-  --border-color: #4f3a2c;
+  --border-default: #404040;
+  --border-color: #404040;
   
-  --violet: #FF5A00;
-  --violet-hover: #E04E00;
-  --violet-muted: #3a1500;
+  --violet: #ccff00; /* Neon Lime Brat Green */
+  --violet-hover: #b3e600;
+  --violet-muted: #2a3300;
 
-  --shadow-sm: 2px 2px 0px #FF5A00;
-  --shadow-md: 4px 4px 0px #FF5A00;
-  --shadow-lg: 6px 6px 0px #FF5A00;
+  --shadow-sm: 2px 2px 0px #ccff00;
+  --shadow-md: 4px 4px 0px #ccff00;
+  --shadow-lg: 6px 6px 0px #ccff00;
 }
 
 /* View Transition API for Dark Mode Toggle */
