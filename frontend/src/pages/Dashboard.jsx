@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { LayoutDashboard, CheckCircle2, Clock, Circle, LogOut } from 'lucide-react';
+import { 
+  LayoutDashboard, CheckCircle2, Clock, Circle, LogOut, 
+  Search, Bell, Settings, Layers, Users, Command 
+} from 'lucide-react';
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
@@ -35,77 +38,134 @@ export default function Dashboard() {
   const doneTasks = tasks.filter(t => t.status === 'DONE');
 
   return (
-    <div className="container flex-col" style={{ height: '100vh', padding: '1rem 2rem' }}>
+    <div className="layout">
       
-      {/* Header */}
-      <header className="flex justify-between items-center glass-panel" style={{ padding: '1rem 2rem', marginBottom: '2rem' }}>
-        <div className="flex items-center gap-4">
-          <LayoutDashboard size={24} color="var(--accent-primary)" />
-          <h1 style={{ fontSize: '1.25rem', margin: 0 }}>OrgFlow</h1>
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="flex items-center gap-2" style={{ marginBottom: '2rem', padding: '0 0.5rem' }}>
+          <div style={{ width: '28px', height: '28px', background: 'var(--accent-primary)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <Layers size={16} color="white" />
+          </div>
+          <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '1rem', letterSpacing: '-0.02em' }}>OrgFlow</span>
         </div>
-        <button onClick={handleLogout} className="btn" style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
-          <LogOut size={16} /> Logout
-        </button>
-      </header>
 
-      {loading ? (
-        <div className="flex items-center justify-center" style={{ flex: 1 }}>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading your workspace...</p>
+        <nav className="flex-col" style={{ flex: 1, gap: '0.25rem' }}>
+          <a href="#" className="nav-item active">
+            <LayoutDashboard size={18} /> Board
+          </a>
+          <a href="#" className="nav-item">
+            <Users size={18} /> Team
+          </a>
+          <a href="#" className="nav-item">
+            <Settings size={18} /> Settings
+          </a>
+        </nav>
+
+        <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
+          <button onClick={handleLogout} className="nav-item" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}>
+            <LogOut size={18} /> Logout
+          </button>
         </div>
-      ) : (
-        <div className="flex gap-4" style={{ flex: 1, overflow: 'hidden' }}>
-          
-          {/* To Do Column */}
-          <div className="flex-col glass-panel" style={{ flex: 1, padding: '1.5rem', background: 'rgba(22, 27, 34, 0.4)' }}>
-            <h3 className="flex items-center gap-4" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
-              <Circle size={18} color="var(--text-secondary)" /> To Do <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{todoTasks.length}</span>
-            </h3>
-            <div className="flex-col gap-4" style={{ overflowY: 'auto', paddingRight: '0.5rem' }}>
-              {todoTasks.map(task => <TaskCard key={task.id} task={task} />)}
-            </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="main-content">
+        
+        {/* Top Header */}
+        <header className="top-header">
+          <div className="flex items-center gap-2" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+            <span style={{ padding: '4px 8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>ACME Corp</span>
+            <span>/</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>Alpha Launch</span>
           </div>
 
-          {/* In Progress Column */}
-          <div className="flex-col glass-panel" style={{ flex: 1, padding: '1.5rem', background: 'rgba(22, 27, 34, 0.4)' }}>
-            <h3 className="flex items-center gap-4" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
-              <Clock size={18} color="var(--accent-primary)" /> In Progress <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{inProgressTasks.length}</span>
-            </h3>
-            <div className="flex-col gap-4" style={{ overflowY: 'auto', paddingRight: '0.5rem' }}>
-              {inProgressTasks.map(task => <TaskCard key={task.id} task={task} />)}
+          <div className="flex items-center gap-4">
+            <div style={{ position: 'relative', width: '240px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+              <input type="text" placeholder="Search tasks..." style={{ paddingLeft: '2rem', paddingRight: '2rem', padding: '0.5rem 2rem', fontSize: '0.8125rem' }} />
+              <Command size={12} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
             </div>
+            <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              <Bell size={18} />
+            </button>
           </div>
+        </header>
 
-          {/* Done Column */}
-          <div className="flex-col glass-panel" style={{ flex: 1, padding: '1.5rem', background: 'rgba(22, 27, 34, 0.4)' }}>
-            <h3 className="flex items-center gap-4" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
-              <CheckCircle2 size={18} color="var(--success)" /> Done <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem' }}>{doneTasks.length}</span>
-            </h3>
-            <div className="flex-col gap-4" style={{ overflowY: 'auto', paddingRight: '0.5rem' }}>
-              {doneTasks.map(task => <TaskCard key={task.id} task={task} />)}
+        {loading ? (
+          <div className="flex items-center justify-center" style={{ flex: 1 }}>
+            <div style={{ width: '24px', height: '24px', border: '2px solid var(--glass-border)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          </div>
+        ) : (
+          <div className="kanban-container">
+            
+            {/* To Do Column */}
+            <div className="kanban-column">
+              <div className="kanban-header">
+                <Circle size={16} color="var(--todo-color)" /> To Do <span className="kanban-count">{todoTasks.length}</span>
+              </div>
+              <div className="kanban-body">
+                {todoTasks.map(task => <TaskCard key={task.id} task={task} />)}
+              </div>
             </div>
-          </div>
 
-        </div>
-      )}
+            {/* In Progress Column */}
+            <div className="kanban-column">
+              <div className="kanban-header">
+                <Clock size={16} color="var(--in-progress-color)" /> In Progress <span className="kanban-count">{inProgressTasks.length}</span>
+              </div>
+              <div className="kanban-body">
+                {inProgressTasks.map(task => <TaskCard key={task.id} task={task} />)}
+              </div>
+            </div>
+
+            {/* Done Column */}
+            <div className="kanban-column">
+              <div className="kanban-header">
+                <CheckCircle2 size={16} color="var(--done-color)" /> Done <span className="kanban-count">{doneTasks.length}</span>
+              </div>
+              <div className="kanban-body">
+                {doneTasks.map(task => <TaskCard key={task.id} task={task} />)}
+              </div>
+            </div>
+
+          </div>
+        )}
+      </main>
     </div>
   );
 }
 
 function TaskCard({ task }) {
+  // Extract initials
+  const initials = task.assignee_details 
+    ? `${task.assignee_details.first_name?.[0] || ''}${task.assignee_details.last_name?.[0] || ''}`.toUpperCase()
+    : 'U';
+    
+  // If no name is provided, default to email prefix
+  const displayName = task.assignee_details?.first_name 
+    ? `${task.assignee_details.first_name} ${task.assignee_details.last_name}`
+    : task.assignee_details?.email?.split('@')[0] || 'Unassigned';
+
   return (
-    <div className="glass-card flex-col" style={{ gap: '0.75rem', cursor: 'pointer' }}>
-      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>ORG-{task.id?.substring(0,4).toUpperCase()}</p>
-      <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '500' }}>{task.title}</h4>
-      {task.assignee_details && (
-        <div className="flex items-center gap-4" style={{ marginTop: '0.5rem' }}>
-          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 'bold' }}>
-            {task.assignee_details.first_name?.[0]}{task.assignee_details.last_name?.[0]}
-          </div>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            {task.assignee_details.first_name} {task.assignee_details.last_name}
+    <div className="task-card flex-col">
+      <div className="task-id">ORG-{task.id?.substring(0,4).toUpperCase() || '0000'}</div>
+      <h4 className="task-title">{task.title}</h4>
+      
+      <div className="task-footer">
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <span style={{ padding: '2px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: '500' }}>
+            ENGINEERING
           </span>
         </div>
-      )}
+        
+        {task.assignee_details && (
+          <div className="flex items-center gap-2">
+            <div className="avatar" title={displayName}>
+              {initials || displayName[0].toUpperCase()}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

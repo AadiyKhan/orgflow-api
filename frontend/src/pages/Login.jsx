@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { LogIn } from 'lucide-react';
+import { LogIn, ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -27,32 +27,41 @@ export default function Login() {
   };
 
   return (
-    <div className="container flex items-center justify-center" style={{ minHeight: '100vh' }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Welcome back</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Sign in to OrgFlow to continue</p>
+    <div className="mesh-bg flex items-center justify-center" style={{ minHeight: '100vh', width: '100%' }}>
+      <div className="glass-panel" style={{ width: '100%', maxWidth: '420px', padding: '3rem', position: 'relative', zIndex: 10 }}>
+        
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div style={{ width: '48px', height: '48px', background: 'var(--accent-primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 0 20px var(--accent-glow)' }}>
+             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+             </svg>
+          </div>
+          <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', letterSpacing: '-0.02em', color: '#fff' }}>Welcome to OrgFlow</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>Enter your details to access your workspace</p>
         </div>
         
         {error && (
-          <div style={{ background: 'rgba(248, 81, 73, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.75rem', borderRadius: '6px', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+          <div style={{ background: 'rgba(229, 72, 77, 0.1)', border: '1px solid rgba(229, 72, 77, 0.3)', color: 'var(--danger)', padding: '0.875rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex-col" style={{ gap: '1.25rem' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Email Address</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-secondary)' }}>Email</label>
             <input 
               type="email" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
-              placeholder="you@example.com" 
+              placeholder="admin@example.com" 
               required 
             />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>Password</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-secondary)' }}>Password</label>
             <input 
               type="password" 
               value={password} 
@@ -62,10 +71,10 @@ export default function Login() {
             />
           </div>
           
-          <button type="submit" className="btn btn-primary mt-4" disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'Signing in...' : (
+          <button type="submit" className="btn btn-primary mt-6" disabled={loading} style={{ width: '100%' }}>
+            {loading ? 'Authenticating...' : (
               <>
-                <LogIn size={18} /> Sign In
+                Continue <ArrowRight size={18} />
               </>
             )}
           </button>
