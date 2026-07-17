@@ -164,6 +164,8 @@ class ConfirmPasswordResetView(APIView):
             
         return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
 
+from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
+
 class InviteMemberView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOrganizationAdmin]
 
@@ -178,45 +180,78 @@ class InviteMemberView(APIView):
         if not org:
             return Response({'error': 'No active organization'}, status=status.HTTP_400_BAD_REQUEST)
             
+        # Check if already a member
         try:
             target_user = User.objects.get(email=email)
-            is_new = False
+            if OrganizationMember.objects.filter(organization=org, user=target_user).exists():
+                return Response({'error': 'User is already a member of this organization.'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
-            target_user = User.objects.create_user(email=email, password='password123')
-            is_new = True
+            pass # It's fine if they don't exist yet, we'll create them when they accept
             
-        # Check if already a member
-        if OrganizationMember.objects.filter(organization=org, user=target_user).exists():
-            return Response({'error': 'User is already a member of this organization.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-        member = OrganizationMember.objects.create(
-            organization=org,
-            user=target_user,
-            role=role
-        )
+        # Generate signed token
+        signer = TimestampSigner()
+        token = signer.sign_object({'email': email, 'org_id': str(org.id), 'role': role})
         
-        # If user has no current organization, set it
-        if not target_user.current_organization:
-            target_user.current_organization = org
-            target_user.save()
-            
         # Send invite email
-        login_url = "http://localhost:5173/login"
+        invite_url = f"http://localhost:5173/invite?token={token}"
         msg = f"You have been invited to join the organization '{org.name}' on OrgFlow.\n\n"
-        if is_new:
-            msg += f"An account has been created for you.\nEmail: {email}\nTemporary Password: password123\n\nPlease log in and change your password.\n{login_url}"
-        else:
-            msg += f"Log in to access your new workspace: {login_url}"
+        msg += f"Click the link below to accept or decline the invitation:\n{invite_url}\n\n"
+        msg += "If you do not have an account, one will be created for you automatically."
             
         send_mail(
             subject=f"You're invited to {org.name} on OrgFlow",
             message=msg,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
-            fail_silently=True,
+            fail_silently=False,
         )
             
         return Response({
-            'message': f'Successfully added {email} to {org.name}',
-            'member': OrganizationMemberSerializer(member).data
-        }, status=status.HTTP_201_CREATED)
+            'message': f'Invite sent successfully to {email}',
+        }, status=status.HTTP_200_OK)
+
+class AcceptInviteView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token = request.data.get('token')
+        if not token:
+            return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        signer = TimestampSigner()
+        try:
+            # Token valid for 7 days
+            data = signer.unsign_object(token, max_age=60 * 60 * 24 * 7)
+        except SignatureExpired:
+            return Response({'error': 'Invite link has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+        except BadSignature:
+            return Response({'error': 'Invalid invite link.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        email = data.get('email')
+        org_id = data.get('org_id')
+        role = data.get('role')
+        
+        try:
+            org = Organization.objects.get(id=org_id)
+        except Organization.DoesNotExist:
+            return Response({'error': 'Organization no longer exists.'}, status=status.HTTP_404_NOT_FOUND)
+            
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Auto create user with a temporary password they can reset later
+            user = User.objects.create_user(email=email, password='password123')
+            
+        # Add to organization if not already a member
+        member, created = OrganizationMember.objects.get_or_create(
+            organization=org,
+            user=user,
+            defaults={'role': role}
+        )
+        
+        # If user has no current organization, set it
+        if not user.current_organization:
+            user.current_organization = org
+            user.save()
+            
+        return Response({'message': f'Successfully joined {org.name}'}, status=status.HTTP_200_OK)
