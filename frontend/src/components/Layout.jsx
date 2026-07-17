@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Search, Settings as SettingsIcon, Layers, Users } from 'lucide-react';
+import { LayoutDashboard, LogOut, Settings as SettingsIcon, Layers, Users } from 'lucide-react';
 
 export default function Layout({ children, pageTitle }) {
   const navigate = useNavigate();
@@ -12,48 +12,33 @@ export default function Layout({ children, pageTitle }) {
     navigate('/login');
   };
 
-  const isActive = (path) => location.pathname === path ? 'nav-item active' : 'nav-item';
+  const cls = (path) => location.pathname === path ? 'nav-link active' : 'nav-link';
 
   return (
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="sidebar-brand-icon">
-            <Layers size={15} color="white" />
-          </div>
+          <div className="sidebar-brand-icon"><Layers size={13} color="white" /></div>
           <span className="sidebar-brand-name">OrgFlow</span>
         </div>
 
+        <div className="sidebar-section-label">Workspace</div>
         <nav className="sidebar-nav">
-          <Link to="/dashboard" className={isActive('/dashboard')}>
-            <LayoutDashboard size={16} /> Board
-          </Link>
-          <Link to="/team" className={isActive('/team')}>
-            <Users size={16} /> Team
-          </Link>
-          <Link to="/settings" className={isActive('/settings')}>
-            <SettingsIcon size={16} /> Settings
-          </Link>
+          <Link to="/dashboard" className={cls('/dashboard')}><LayoutDashboard size={15} /> Board</Link>
+          <Link to="/team" className={cls('/team')}><Users size={15} /> Team</Link>
+          <Link to="/settings" className={cls('/settings')}><SettingsIcon size={15} /> Settings</Link>
         </nav>
 
         <div className="sidebar-footer">
-          <button onClick={handleLogout} className="nav-item">
-            <LogOut size={16} /> Sign out
-          </button>
+          <button onClick={handleLogout} className="nav-link"><LogOut size={15} /> Sign out</button>
         </div>
       </aside>
 
-      <main className="main-content">
+      <main className="main-area">
         <header className="top-bar">
-          <div className="breadcrumb">
-            <span>Workspace</span>
-            <span>/</span>
-            <span className="breadcrumb-current">{pageTitle}</span>
-          </div>
-          <div className="search-box">
-            <Search size={14} className="search-icon" />
-            <input type="text" placeholder="Search..." />
-          </div>
+          <span className="top-bar-parent">Workspace</span>
+          <span className="top-bar-separator">/</span>
+          <span className="top-bar-title">{pageTitle}</span>
         </header>
         {children}
       </main>

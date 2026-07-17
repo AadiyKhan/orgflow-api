@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Plus, MoreHorizontal, Circle, ArrowRight, CheckCircle2, Trash2 } from 'lucide-react';
+import { Plus, MoreHorizontal, ArrowRight, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
 
-const STATUS_CONFIG = {
-  TODO: { label: 'To Do', color: '#71717A' },
-  IN_PROGRESS: { label: 'In Progress', color: '#3B82F6' },
-  DONE: { label: 'Done', color: '#22C55E' },
-};
+const COLS = [
+  { key: 'TODO',        label: 'To Do',       color: '#71717A' },
+  { key: 'IN_PROGRESS', label: 'In Progress',  color: '#38BDF8' },
+  { key: 'DONE',        label: 'Done',         color: '#10B981' },
+];
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
@@ -22,28 +22,17 @@ export default function Dashboard() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        const [tasksRes, projectsRes] = await Promise.all([
-          api.get('/tasks/'),
-          api.get('/projects/')
-        ]);
-        setTasks(tasksRes.data.results || tasksRes.data);
-        setProjects(projectsRes.data.results || projectsRes.data);
-      } catch (err) {
-        if (err.response?.status === 401) navigate('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+        const [t, p] = await Promise.all([api.get('/tasks/'), api.get('/projects/')]);
+        setTasks(t.data.results || t.data);
+        setProjects(p.data.results || p.data);
+      } catch (err) { if (err.response?.status === 401) navigate('/login'); }
+      finally { setLoading(false); }
+    })();
   }, [navigate]);
 
-  const openModal = (status) => {
-    setModalStatus(status);
-    setNewTitle('');
-    setModalOpen(true);
-  };
+  const openCreate = (status) => { setModalStatus(status); setNewTitle(''); setModalOpen(true); };
 
   const createTask = async (e) => {
     e.preventDefault();
@@ -51,58 +40,44 @@ export default function Dashboard() {
     setSubmitting(true);
     try {
       const res = await api.post('/tasks/', { title: newTitle, status: modalStatus, project: projects[0].id });
-      setTasks([res.data, ...tasks]);
+      setTasks(prev => [res.data, ...prev]);
       setModalOpen(false);
-    } catch { /* silently fail */ }
-    finally { setSubmitting(false); }
+    } catch { /* */ } finally { setSubmitting(false); }
   };
 
-  const changeStatus = async (taskId, newStatus) => {
-    setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-    try {
-      await api.patch(`/tasks/${taskId}/`, { status: newStatus });
-    } catch {
-      const res = await api.get('/tasks/');
-      setTasks(res.data.results || res.data);
-    }
+  const moveTask = async (id, status) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+    try { await api.patch(`/tasks/${id}/`, { status }); }
+    catch { const r = await api.get('/tasks/'); setTasks(r.data.results || r.data); }
   };
 
-  const deleteTask = async (taskId) => {
-    setTasks(tasks.filter(t => t.id !== taskId));
-    try {
-      await api.delete(`/tasks/${taskId}/`);
-    } catch {
-      const res = await api.get('/tasks/');
-      setTasks(res.data.results || res.data);
-    }
+  const removeTask = async (id) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    try { await api.delete(`/tasks/${id}/`); }
+    catch { const r = await api.get('/tasks/'); setTasks(r.data.results || r.data); }
   };
-
-  const columns = ['TODO', 'IN_PROGRESS', 'DONE'];
 
   return (
     <Layout pageTitle={projects[0]?.name || 'Board'}>
       {loading ? (
-        <div className="flex items-center justify-center" style={{ flex: 1 }}><div className="spinner"></div></div>
+        <div className="flex items-center justify-center" style={{ flex: 1 }}><div className="spinner" /></div>
       ) : (
         <div className="kanban">
-          {columns.map(status => {
-            const cfg = STATUS_CONFIG[status];
-            const colTasks = tasks.filter(t => t.status === status);
+          {COLS.map(col => {
+            const items = tasks.filter(t => t.status === col.key);
             return (
-              <div className="kanban-col" key={status}>
-                <div className="kanban-col-header">
-                  <div className="kanban-col-label">
-                    <span className="kanban-col-dot" style={{ background: cfg.color }}></span>
-                    {cfg.label}
-                    <span className="kanban-col-count">{colTasks.length}</span>
+              <div className="kanban-col" key={col.key}>
+                <div className="kanban-col-head">
+                  <div className="kanban-col-info">
+                    <span className="kanban-dot" style={{ background: col.color }} />
+                    {col.label}
+                    <span className="kanban-col-count">{items.length}</span>
                   </div>
-                  <button className="kanban-col-add" onClick={() => openModal(status)}>
-                    <Plus size={16} />
-                  </button>
+                  <button className="kanban-add-btn" onClick={() => openCreate(col.key)}><Plus size={15} /></button>
                 </div>
                 <div className="kanban-col-body">
-                  {colTasks.map(task => (
-                    <TaskCard key={task.id} task={task} onChangeStatus={changeStatus} onDelete={deleteTask} />
+                  {items.map(t => (
+                    <TaskCard key={t.id} task={t} onMove={moveTask} onDelete={removeTask} />
                   ))}
                 </div>
               </div>
@@ -111,22 +86,17 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Create Task Modal */}
       {modalOpen && (
-        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}>
-          <div className="modal-card">
+        <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) setModalOpen(false); }}>
+          <div className="modal">
             <h3 className="modal-title">New task</h3>
-            <p className="modal-desc">Adding to {STATUS_CONFIG[modalStatus].label}</p>
+            <p className="modal-desc">Adding to {COLS.find(c => c.key === modalStatus)?.label}</p>
             <form onSubmit={createTask}>
-              <div>
-                <label>Title</label>
-                <input autoFocus type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="What needs to be done?" required />
-              </div>
+              <label>Title</label>
+              <input autoFocus type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="What needs to be done?" required />
               <div className="modal-footer">
                 <button type="button" className="btn" onClick={() => setModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Creating...' : 'Create'}
-                </button>
+                <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Creating...' : 'Create'}</button>
               </div>
             </form>
           </div>
@@ -136,42 +106,37 @@ export default function Dashboard() {
   );
 }
 
-function TaskCard({ task, onChangeStatus, onDelete }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
+function TaskCard({ task, onMove, onDelete }) {
+  const [open, setOpen] = useState(false);
   const initials = task.assignee_details
-    ? `${task.assignee_details.first_name?.[0] || ''}${task.assignee_details.last_name?.[0] || ''}`.toUpperCase() || task.assignee_details.email?.[0]?.toUpperCase()
+    ? (`${task.assignee_details.first_name?.[0] || ''}${task.assignee_details.last_name?.[0] || ''}`.toUpperCase() || task.assignee_details.email?.[0]?.toUpperCase())
     : null;
 
-  const otherStatuses = ['TODO', 'IN_PROGRESS', 'DONE'].filter(s => s !== task.status);
+  const targets = COLS.filter(c => c.key !== task.status);
 
   return (
-    <div className="task-card" onMouseLeave={() => setMenuOpen(false)}>
-      <div className="task-card-header">
+    <div className="task-card" onMouseLeave={() => setOpen(false)}>
+      <div className="task-card-top">
         <span className="task-card-id">ORG-{task.id?.substring(0, 4).toUpperCase()}</span>
         <div style={{ position: 'relative' }}>
-          <button className="task-card-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
-            <MoreHorizontal size={14} />
-          </button>
-          {menuOpen && (
-            <div className="dropdown-menu">
-              {otherStatuses.map(s => (
-                <button key={s} className="dropdown-item" onClick={() => { onChangeStatus(task.id, s); setMenuOpen(false); }}>
-                  <ArrowRight size={14} />
-                  Move to {STATUS_CONFIG[s].label}
+          <button className="task-card-actions" onClick={() => setOpen(!open)}><MoreHorizontal size={14} /></button>
+          {open && (
+            <div className="ctx-menu">
+              {targets.map(t => (
+                <button key={t.key} className="ctx-item" onClick={() => { onMove(task.id, t.key); setOpen(false); }}>
+                  <ArrowRight size={13} /> Move to {t.label}
                 </button>
               ))}
-              <div className="dropdown-separator"></div>
-              <button className="dropdown-item" style={{ color: 'var(--red)' }} onClick={() => { onDelete(task.id); setMenuOpen(false); }}>
-                <Trash2 size={14} />
-                Delete
+              <div className="ctx-divider" />
+              <button className="ctx-item ctx-item--danger" onClick={() => { onDelete(task.id); setOpen(false); }}>
+                <Trash2 size={13} /> Delete
               </button>
             </div>
           )}
         </div>
       </div>
       <div className="task-card-title">{task.title}</div>
-      <div className="task-card-footer">
+      <div className="task-card-meta">
         <span className="task-card-tag">Engineering</span>
         {initials && <div className="avatar">{initials}</div>}
       </div>

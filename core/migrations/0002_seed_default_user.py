@@ -16,6 +16,8 @@ def seed_data(apps, schema_editor):
         user = User.objects.create(
             email='admin@example.com',
             password=make_password('password123'),
+            first_name='Aadiy',
+            last_name='Khan',
             is_staff=True,
             is_superuser=True,
             is_active=True,
@@ -28,59 +30,38 @@ def seed_data(apps, schema_editor):
             role='ADMIN'
         )
 
-        # ---------------------------------------------
-        # Seed Sample Data for the Kanban Board
-        # ---------------------------------------------
         Project = apps.get_model('projects', 'Project')
         Task = apps.get_model('projects', 'Task')
 
-        # Create a Project
         project = Project.objects.create(
             organization=org,
             name='Alpha Launch',
-            description='Launch the initial version of OrgFlow'
+            description='Ship the initial version of OrgFlow to production'
         )
 
-        # Create Tasks
-        Task.objects.create(
-            organization=org,
-            project=project,
-            title='Design system overhaul',
-            description='Implement glassmorphism and dark mode',
-            status='DONE',
-            reporter=user,
-            assignee=user
-        )
+        # TODO tasks
+        for title in [
+            'Set up CI/CD pipeline with GitHub Actions',
+            'Write API documentation for public endpoints',
+            'Implement role-based access control for viewers',
+        ]:
+            Task.objects.create(organization=org, project=project, title=title, status='TODO', reporter=user, assignee=user)
 
-        Task.objects.create(
-            organization=org,
-            project=project,
-            title='Configure PostgreSQL on Render',
-            description='Migrate from SQLite to PostgreSQL for production',
-            status='IN_PROGRESS',
-            reporter=user,
-            assignee=user
-        )
+        # IN_PROGRESS tasks
+        for title in [
+            'Configure PostgreSQL on production',
+            'Build notification service for task updates',
+        ]:
+            Task.objects.create(organization=org, project=project, title=title, status='IN_PROGRESS', reporter=user, assignee=user)
 
-        Task.objects.create(
-            organization=org,
-            project=project,
-            title='Implement drag-and-drop on Kanban',
-            description='Add react-beautiful-dnd for task columns',
-            status='TODO',
-            reporter=user,
-            assignee=user
-        )
-
-        Task.objects.create(
-            organization=org,
-            project=project,
-            title='Add unit tests for Tenant Isolation',
-            description='Prove Org A cannot see Org B data',
-            status='DONE',
-            reporter=user,
-            assignee=user
-        )
+        # DONE tasks
+        for title in [
+            'Design system and component library',
+            'Implement JWT authentication flow',
+            'Add tenant isolation at the queryset level',
+            'Deploy backend to Render',
+        ]:
+            Task.objects.create(organization=org, project=project, title=title, status='DONE', reporter=user, assignee=user)
 
 class Migration(migrations.Migration):
 

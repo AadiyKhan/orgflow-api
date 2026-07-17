@@ -10,62 +10,45 @@ export default function Team() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const response = await api.get('/members/');
-        setMembers(response.data.results || response.data);
-      } catch (err) {
-        if (err.response?.status === 401) navigate('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMembers();
+    (async () => {
+      try { const r = await api.get('/members/'); setMembers(r.data.results || r.data); }
+      catch (e) { if (e.response?.status === 401) navigate('/login'); }
+      finally { setLoading(false); }
+    })();
   }, [navigate]);
 
-  const getName = (m) => {
-    const first = m.user_details?.first_name;
-    const last = m.user_details?.last_name;
-    if (first || last) return `${first || ''} ${last || ''}`.trim();
-    return m.user_details?.email?.split('@')[0] || 'Unknown';
-  };
-
-  const getInitial = (m) => {
-    const name = getName(m);
-    return name[0]?.toUpperCase() || '?';
+  const name = (m) => {
+    const f = m.user_details?.first_name, l = m.user_details?.last_name;
+    return (f || l) ? `${f || ''} ${l || ''}`.trim() : m.user_details?.email?.split('@')[0] || 'Unknown';
   };
 
   return (
     <Layout pageTitle="Team">
-      <div className="page-container">
-        <div className="page-inner">
+      <div className="page-scroll">
+        <div className="page-center">
           <div className="page-header">
             <h2 className="page-title">Members</h2>
             <button className="btn btn-primary"><UserPlus size={14} /> Invite</button>
           </div>
 
           {loading ? (
-            <div className="flex justify-center mt-4"><div className="spinner"></div></div>
+            <div className="flex justify-center mt-4"><div className="spinner" /></div>
           ) : (
             <div className="card">
-              {members.map((member, i) => (
-                <div key={member.id} className="member-row" style={i > 0 ? { borderTop: '1px solid var(--border)' } : {}}>
+              {members.map(m => (
+                <div key={m.id} className="member-row">
                   <div className="member-info">
-                    <div className="avatar avatar-lg">{getInitial(member)}</div>
+                    <div className="avatar avatar-md">{name(m)[0]?.toUpperCase()}</div>
                     <div>
-                      <div className="member-name">{getName(member)}</div>
-                      <div className="member-email">{member.user_details?.email}</div>
+                      <div className="member-name">{name(m)}</div>
+                      <div className="member-email">{m.user_details?.email}</div>
                     </div>
                   </div>
-                  <span className={`badge ${member.role === 'ADMIN' ? 'badge-admin' : 'badge-member'}`}>
-                    {member.role}
-                  </span>
+                  <span className={`badge ${m.role === 'ADMIN' ? 'badge-admin' : 'badge-member'}`}>{m.role}</span>
                 </div>
               ))}
-              {members.length === 0 && (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  No team members found.
-                </div>
+              {!members.length && (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>No members found.</div>
               )}
             </div>
           )}
