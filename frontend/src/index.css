@@ -46,11 +46,17 @@
 }
 
 html.dark {
+  --surface-0: #111111;
+  --surface-1: #1c1c1c;
+  --surface-2: #2a2a2a;
   --bg-color: #111111;
   --bg-pattern: radial-gradient(#333 1px, transparent 1px);
   --card-bg: #1c1c1c;
   --text-main: #ffffff;
+  --text-primary: #ffffff;
   --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --border-default: #FF2A2A;
   --border-color: #FF2A2A;
   --shadow-sm: 2px 2px 0px #FF2A2A;
   --shadow-md: 4px 4px 0px #FF2A2A;

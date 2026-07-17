@@ -5,7 +5,7 @@ import api from '../api';
 import { Plus, MoreHorizontal, ArrowRight, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { DndContext, DragOverlay, closestCorners, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, arrayMove, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 const COLS = [
@@ -89,8 +89,10 @@ export default function Dashboard() {
       let colTasks = tasks.filter(t => t.status === newStatus);
       if (activeTask.status === newStatus) {
         const oldIdx = colTasks.findIndex(t => t.id === activeTask.id);
-        const newIdx = colTasks.findIndex(t => t.id === overTask.id);
-        colTasks = arrayMove(colTasks, oldIdx, newIdx);
+        const newIdx = overTask ? colTasks.findIndex(t => t.id === overTask.id) : colTasks.length - 1;
+        if (newIdx !== -1) {
+          colTasks = arrayMove(colTasks, oldIdx, newIdx);
+        }
       } else {
         const insertIdx = overTask ? colTasks.findIndex(t => t.id === overTask.id) : colTasks.length;
         colTasks.splice(insertIdx, 0, { ...activeTask, status: newStatus });
@@ -236,7 +238,7 @@ function KanbanColumn({ col, tasks, onAdd, onClickTask }) {
         <button className="kanban-add-btn" onClick={onAdd}><Plus size={15} /></button>
       </div>
       <div className="kanban-col-body" ref={setNodeRef}>
-        <SortableContext items={tasks.map(t => t.id)} strategy={rectSortingStrategy}>
+        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map(t => (
             <SortableTaskCard key={t.id} task={t} onClick={() => onClickTask(t)} />
           ))}
