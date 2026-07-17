@@ -46,21 +46,27 @@
 }
 
 html.dark {
-  --surface-0: #111111;
-  --surface-1: #1c1c1c;
-  --surface-2: #2a2a2a;
-  --bg-color: #111111;
+  --surface-0: #121212;
+  --surface-1: #1e1e1e;
+  --surface-2: #2d2d2d;
+  --bg-color: #121212;
   --bg-pattern: radial-gradient(#333 1px, transparent 1px);
-  --card-bg: #1c1c1c;
-  --text-main: #ffffff;
-  --text-primary: #ffffff;
+  --card-bg: #1e1e1e;
+  --text-main: #f4f4f5;
+  --text-primary: #f4f4f5;
   --text-secondary: #a1a1aa;
   --text-tertiary: #71717a;
-  --border-default: #FF2A2A;
-  --border-color: #FF2A2A;
-  --shadow-sm: 2px 2px 0px #FF2A2A;
-  --shadow-md: 4px 4px 0px #FF2A2A;
-  --shadow-lg: 6px 6px 0px #FF2A2A;
+  
+  --border-default: #333333;
+  --border-color: #333333;
+  
+  --violet: #FF00FF;
+  --violet-hover: #D500D5;
+  --violet-muted: #3D003D;
+
+  --shadow-sm: 2px 2px 0px #00E5FF;
+  --shadow-md: 4px 4px 0px #00E5FF;
+  --shadow-lg: 6px 6px 0px #00E5FF;
 }
 
 /* View Transition API for Dark Mode Toggle */
@@ -86,9 +92,14 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-image: radial-gradient(#000000 1px, transparent 1px);
+  background-image: var(--bg-pattern);
   background-size: 20px 20px;
   background-color: var(--surface-0);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card, .btn, .sidebar, .kanban-col, .task-card, .top-bar, .modal, .auth-card, .kanban-col-head {
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ═══════════════════════════════════════════════
@@ -127,7 +138,7 @@ body {
 .auth-logo {
   width: 48px; height: 48px;
   background: var(--violet);
-  border: var(--border-width) solid #000;
+  border: var(--border-width) solid var(--border-default);
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
   display: flex; align-items: center; justify-content: center;
@@ -192,10 +203,10 @@ body {
 .sidebar-brand-icon {
   width: 32px; height: 32px;
   background: var(--violet);
-  border: 2px solid #000;
+  border: 2px solid var(--border-default);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 2px 2px 0px #000;
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
 
@@ -231,16 +242,16 @@ body {
 .nav-link:hover { 
   background: var(--surface-0); 
   color: var(--text-primary); 
-  border: 2px solid #000;
-  box-shadow: 2px 2px 0px #000;
+  border: 2px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   transform: translate(-1px, -1px);
 }
 
 .nav-link.active { 
   background: var(--violet); 
   color: #fff; 
-  border: 2px solid #000;
-  box-shadow: 2px 2px 0px #000;
+  border: 2px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
 }
 
 .sidebar-footer {
@@ -334,23 +345,23 @@ body {
 
 .kanban-dot {
   width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
-  border: 2px solid #000;
+  border: 2px solid var(--border-default);
 }
 
 .kanban-col-count {
   color: var(--text-primary); font-size: 0.75rem; font-weight: 700;
-  background: #fff; border: 2px solid #000;
+  background: var(--surface-1); border: 2px solid var(--border-default);
   padding: 2px 8px; border-radius: 9999px;
 }
 
 .kanban-add-btn {
-  background: #fff; border: 2px solid #000; color: #000;
+  background: var(--surface-1); border: 2px solid var(--border-default); color: var(--text-primary);
   cursor: pointer; padding: 4px; border-radius: var(--r-sm);
   display: flex; align-items: center; transition: all 0.15s;
-  box-shadow: 2px 2px 0px #000;
+  box-shadow: var(--shadow-sm);
 }
-.kanban-add-btn:hover { background: var(--violet); color: #fff; transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #000;}
-.kanban-add-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
+.kanban-add-btn:hover { background: var(--violet); color: #fff; transform: translate(-1px, -1px); box-shadow: var(--shadow-md);}
+.kanban-add-btn:active { transform: translate(1px, 1px); box-shadow: var(--shadow-sm); }
 
 .kanban-col-body {
   padding: 0.75rem; display: flex; flex-direction: column;
@@ -361,8 +372,8 @@ body {
    TASK CARD
    ═══════════════════════════════════════════════ */
 .task-card {
-  background: #fff;
-  border: 2px solid #000;
+  background: var(--surface-1);
+  border: 2px solid var(--border-default);
   border-radius: var(--r-md);
   padding: 1rem;
   cursor: grab;
@@ -394,13 +405,13 @@ body {
 }
 
 .task-card-actions {
-  background: #fff; border: 2px solid transparent; color: var(--text-primary);
+  background: var(--surface-1); border: 2px solid transparent; color: var(--text-primary);
   cursor: pointer; padding: 2px; border-radius: var(--r-sm);
   display: flex; align-items: center;
   transition: all 0.15s;
 }
-.task-card:hover .task-card-actions { border-color: #000; }
-.task-card-actions:hover { background: var(--violet); color: #fff; box-shadow: 2px 2px 0px #000;}
+.task-card:hover .task-card-actions { border-color: var(--border-default); }
+.task-card-actions:hover { background: var(--violet); color: #fff; box-shadow: var(--shadow-sm);}
 
 .task-card-title {
   font-size: 0.9375rem; font-weight: 600;
@@ -416,7 +427,7 @@ body {
   font-size: 0.6875rem; font-weight: 700;
   padding: 2px 8px; border-radius: 9999px;
   background: var(--sky-muted); color: var(--text-primary);
-  border: 2px solid #000;
+  border: 2px solid var(--border-default);
   letter-spacing: 0.03em; text-transform: uppercase;
 }
 
@@ -426,8 +437,8 @@ body {
 .ctx-menu {
   position: absolute; right: 0; top: calc(100% + 4px);
   min-width: 170px; z-index: 60;
-  background: #fff;
-  border: var(--border-width) solid #000;
+  background: var(--surface-1);
+  border: var(--border-width) solid var(--border-default);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-md);
   padding: 4px;
@@ -442,11 +453,11 @@ body {
   border-radius: var(--r-sm); text-align: left;
   transition: all 0.1s;
 }
-.ctx-item:hover { background: var(--sky); border: 2px solid #000; color: #000; }
+.ctx-item:hover { background: var(--sky); border: 2px solid var(--border-default); color: #000; }
 .ctx-item--danger { color: var(--rose); }
-.ctx-item--danger:hover { background: var(--rose); border: 2px solid #000; color: #fff; }
+.ctx-item--danger:hover { background: var(--rose); border: 2px solid var(--border-default); color: #fff; }
 
-.ctx-divider { height: 2px; background: #000; margin: 4px 0; }
+.ctx-divider { height: 2px; background: var(--border-default); margin: 4px 0; }
 
 /* ═══════════════════════════════════════════════
    AVATAR
@@ -454,10 +465,10 @@ body {
 .avatar {
   width: 28px; height: 28px; border-radius: 50%;
   background: var(--amber);
-  border: 2px solid #000;
+  border: 2px solid var(--border-default);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.75rem; font-weight: 700; color: #000;
-  flex-shrink: 0; box-shadow: 2px 2px 0px #000;
+  flex-shrink: 0; box-shadow: var(--shadow-sm);
 }
 .avatar-md { width: 40px; height: 40px; font-size: 1rem; border-width: 3px; }
 
@@ -473,7 +484,7 @@ label {
 input[type="text"], input[type="email"], input[type="password"] {
   width: 100%;
   padding: 0.625rem 0.75rem;
-  background: #fff;
+  background: var(--surface-1);
   border: var(--border-width) solid var(--border-default);
   border-radius: var(--r-md);
   color: var(--text-primary);
@@ -502,7 +513,7 @@ input::placeholder { color: var(--text-tertiary); font-weight: 400; }
   font-family: inherit; cursor: pointer;
   transition: all 0.15s;
   border: var(--border-width) solid var(--border-default);
-  background: #fff; color: var(--text-primary);
+  background: var(--surface-1); color: var(--text-primary);
   box-shadow: var(--shadow-sm);
 }
 .btn:hover { 
@@ -528,7 +539,7 @@ input::placeholder { color: var(--text-tertiary); font-weight: 400; }
   padding: 0.375rem; cursor: pointer; box-shadow: none;
 }
 .btn-ghost:hover { 
-  color: var(--text-primary); border-color: #000; box-shadow: 2px 2px 0px #000; 
+  color: var(--text-primary); border-color: var(--border-default); box-shadow: var(--shadow-sm); 
   transform: translate(-1px, -1px);
 }
 
@@ -557,7 +568,7 @@ input::placeholder { color: var(--text-tertiary); font-weight: 400; }
 .card-icon {
   width: 40px; height: 40px; border-radius: var(--r-sm);
   display: flex; align-items: center; justify-content: center;
-  border: 2px solid #000; background: var(--amber); box-shadow: 2px 2px 0px #000;
+  border: 2px solid var(--border-default); background: var(--amber); box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
 
@@ -570,7 +581,7 @@ input::placeholder { color: var(--text-tertiary); font-weight: 400; }
   padding: 2px 8px; border-radius: 9999px;
   font-size: 0.6875rem; font-weight: 700;
   letter-spacing: 0.05em; text-transform: uppercase;
-  border: 2px solid #000;
+  border: 2px solid var(--border-default);
 }
 .badge-admin { background: var(--amber); color: #000; }
 .badge-member { background: var(--sky); color: #000; }
@@ -616,8 +627,8 @@ input::placeholder { color: var(--text-tertiary); font-weight: 400; }
    ═══════════════════════════════════════════════ */
 .token-block {
   display: flex; align-items: center; justify-content: space-between;
-  background: #fff;
-  border: 2px solid #000;
+  background: var(--surface-1);
+  border: 2px solid var(--border-default);
   border-radius: var(--r-md);
   padding: 0.625rem 0.75rem;
   box-shadow: var(--shadow-sm);
@@ -634,11 +645,11 @@ input::placeholder { color: var(--text-tertiary); font-weight: 400; }
    ═══════════════════════════════════════════════ */
 .toast {
   position: fixed; bottom: 1.5rem; right: 1.5rem;
-  background: #fff;
-  border: var(--border-width) solid #000;
+  background: var(--surface-1);
+  border: var(--border-width) solid var(--border-default);
   border-radius: var(--r-md);
   padding: 0.75rem 1rem;
-  font-size: 0.875rem; font-weight: 700; color: #000;
+  font-size: 0.875rem; font-weight: 700; color: var(--text-primary);
   box-shadow: var(--shadow-md);
   z-index: 200;
   animation: toastIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);

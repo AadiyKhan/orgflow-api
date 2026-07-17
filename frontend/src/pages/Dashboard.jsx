@@ -75,6 +75,33 @@ export default function Dashboard() {
     setActiveTask(tasks.find(t => t.id === active.id));
   };
 
+  const handleDragOver = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    
+    const activeTask = tasks.find(t => t.id === active.id);
+    const overTask = tasks.find(t => t.id === over.id);
+    const overCol = COLS.find(c => c.key === over.id);
+    if (!activeTask) return;
+
+    const newStatus = overCol ? overCol.key : (overTask ? overTask.status : activeTask.status);
+
+    queryClient.setQueryData(['tasks', activeProject?.id], oldTasks => {
+      let newTasks = [...oldTasks];
+      const oldIdx = newTasks.findIndex(t => t.id === active.id);
+      
+      if (activeTask.status !== newStatus) {
+        newTasks[oldIdx] = { ...newTasks[oldIdx], status: newStatus };
+      }
+      
+      if (overTask && activeTask.id !== overTask.id) {
+         const newIdx = newTasks.findIndex(t => t.id === overTask.id);
+         newTasks = arrayMove(newTasks, oldIdx, newIdx);
+      }
+      return newTasks;
+    });
+  };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     setActiveTask(null);
@@ -85,32 +112,14 @@ export default function Dashboard() {
     const overTask = tasks.find(t => t.id === over.id);
     const newStatus = overCol ? overCol.key : (overTask ? overTask.status : activeTask.status);
     
-    if (activeTask.status !== newStatus || (overTask && activeTask.id !== overTask.id)) {
-      let colTasks = tasks.filter(t => t.status === newStatus);
-      if (activeTask.status === newStatus) {
-        const oldIdx = colTasks.findIndex(t => t.id === activeTask.id);
-        const newIdx = overTask ? colTasks.findIndex(t => t.id === overTask.id) : colTasks.length - 1;
-        if (newIdx !== -1) {
-          colTasks = arrayMove(colTasks, oldIdx, newIdx);
-        }
-      } else {
-        const insertIdx = overTask ? colTasks.findIndex(t => t.id === overTask.id) : colTasks.length;
-        colTasks.splice(insertIdx, 0, { ...activeTask, status: newStatus });
-      }
-
-      const updates = colTasks.map((t, idx) => ({ ...t, order: idx }));
+    // We already optimistically moved everything in onDragOver, so we just calculate the final order and push to backend
+    let colTasks = tasks.filter(t => t.status === newStatus);
+    const activeUpdate = colTasks.find(t => t.id === activeTask.id);
+    if (activeUpdate) {
+      updateTaskMut.mutate({ id: activeTask.id, status: newStatus, order: colTasks.indexOf(activeUpdate) });
       
-      queryClient.setQueryData(['tasks', activeProject?.id], old => old.map(t => {
-        const updated = updates.find(u => u.id === t.id);
-        return updated ? updated : t;
-      }));
-
-      const activeUpdate = updates.find(u => u.id === activeTask.id);
-      updateTaskMut.mutate({ id: activeTask.id, status: newStatus, order: activeUpdate.order });
-      
-      // Fire and forget update for other affected tasks to keep order synced
-      updates.forEach(u => {
-        if (u.id !== activeTask.id) api.patch(`/tasks/${u.id}/`, { order: u.order }).catch(()=>{});
+      colTasks.forEach((u, idx) => {
+        if (u.id !== activeTask.id) api.patch(`/tasks/${u.id}/`, { order: idx }).catch(()=>{});
       });
     }
   };
@@ -130,7 +139,7 @@ export default function Dashboard() {
       {isLoading ? (
         <div className="flex items-center justify-center" style={{ flex: 1 }}><div className="spinner" /></div>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <div className="kanban">
             {COLS.map(col => {
               const colTasks = tasks.filter(t => t.status === col.key);
@@ -145,7 +154,7 @@ export default function Dashboard() {
               );
             })}
           </div>
-          <DragOverlay>
+          <DragOverlay dropAnimation={null}>
             {activeTask ? <TaskCard task={activeTask} /> : null}
           </DragOverlay>
         </DndContext>

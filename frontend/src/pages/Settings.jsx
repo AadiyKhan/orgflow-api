@@ -79,44 +79,8 @@ export default function Settings() {
                 <div className="card-icon" style={{ background: 'var(--violet-muted)' }}><Palette size={16} color="var(--violet)" /></div>
                 <div><div className="card-label">Appearance</div><div className="card-desc">Toggle Dark/Light mode theme.</div></div>
               </div>
-              <button className="btn" onClick={(e) => {
-                const isDark = document.documentElement.classList.contains('dark');
-                
-                // Bulletproof custom overlay animation
-                const overlay = document.createElement('div');
-                overlay.style.position = 'fixed';
-                overlay.style.top = '0';
-                overlay.style.left = '0';
-                overlay.style.width = '100vw';
-                overlay.style.height = '100vh';
-                overlay.style.pointerEvents = 'none';
-                overlay.style.zIndex = '9999';
-                
-                // Set the starting background to the NEW theme color
-                overlay.style.background = isDark ? '#F6F5F0' : '#111111'; // surface-0 colors
-                
-                // Calculate clip path circle
-                const x = e.clientX || window.innerWidth / 2;
-                const y = e.clientY || window.innerHeight / 2;
-                const endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-                
-                overlay.style.clipPath = `circle(0px at ${x}px ${y}px)`;
-                document.body.appendChild(overlay);
-                
-                // Trigger animation
-                requestAnimationFrame(() => {
-                  overlay.style.transition = 'clip-path 0.6s ease-in-out';
-                  overlay.style.clipPath = `circle(${endRadius}px at ${x}px ${y}px)`;
-                  
-                  // Wait for overlay to cover screen, then switch actual DOM theme and remove overlay
-                  setTimeout(() => {
-                    document.documentElement.classList.toggle('dark');
-                    overlay.style.opacity = '0';
-                    overlay.style.transition = 'opacity 0.2s ease';
-                    setTimeout(() => overlay.remove(), 200);
-                  }, 600);
-                });
-                
+              <button className="btn" onClick={() => {
+                document.documentElement.classList.toggle('dark');
                 fire('Theme updated');
               }}>Toggle</button>
             </div>
