@@ -1,6 +1,6 @@
 <div align="center">
   
-# 🏢 OrgFlow API
+# OrgFlow API
   
 **A Production-Grade, Multi-Tenant Backend API for Agile Teams**
 
@@ -16,27 +16,27 @@
 
 ---
 
-## 📑 Table of Contents
-- [✨ Key Features](#-key-features)
-- [🏗️ System Architecture](#-system-architecture)
-- [⚡ Performance Metrics & Optimizations](#-performance-metrics--optimizations)
-- [📊 Example API Outputs](#-example-api-outputs)
-- [🚀 Quick Start (Docker)](#-quick-start-docker)
-- [🤖 AI-Assisted Workflow](#-ai-assisted-workflow)
+## Table of Contents
+- [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [Performance Metrics & Optimizations](#performance-metrics--optimizations)
+- [Example API Outputs](#example-api-outputs)
+- [Quick Start (Docker)](#quick-start-docker)
+- [AI-Assisted Workflow](#ai-assisted-workflow)
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🛡️ Hard Multi-Tenancy**: Data isolation is enforced at the database queryset level via a custom `TenantScopedViewSet`. Organizations share a database but can never cross-pollinate data.
-- **🔐 Custom JWT Authentication**: Secure, stateless authentication utilizing email as the primary identifier.
-- **👥 Role-Based Access Control (RBAC)**: Fine-grained permissions featuring `ADMIN`, `MEMBER`, and `VIEWER` roles. Viewers are mathematically restricted to `SAFE_METHODS`.
-- **🚦 Production Defenses**: Built-in DRF rate limiting (Throttling) to prevent abuse and custom exception handlers for uniform, structured error shapes.
-- **🐳 Containerized Infrastructure**: Fully Dockerized with multi-stage builds and a PostgreSQL 15 database ready for orchestration.
+- **Hard Multi-Tenancy**: Data isolation is enforced at the database queryset level via a custom `TenantScopedViewSet`. Organizations share a database but can never cross-pollinate data.
+- **Custom JWT Authentication**: Secure, stateless authentication utilizing email as the primary identifier.
+- **Role-Based Access Control (RBAC)**: Fine-grained permissions featuring `ADMIN`, `MEMBER`, and `VIEWER` roles. Viewers are mathematically restricted to `SAFE_METHODS`.
+- **Production Defenses**: Built-in DRF rate limiting (Throttling) to prevent abuse and custom exception handlers for uniform, structured error shapes.
+- **Containerized Infrastructure**: Fully Dockerized with multi-stage builds and a PostgreSQL 15 database ready for orchestration.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 OrgFlow separates concerns into domain-driven Django applications:
 
@@ -48,7 +48,7 @@ Routes are nested logically to reflect the data hierarchy:
 
 ---
 
-## ⚡ Performance Metrics & Optimizations
+## Performance Metrics & Optimizations
 
 A common pitfall in ORM-based REST APIs is the **N+1 Query Problem**, especially when serializing nested relational data (like assigning users to tasks).
 
@@ -63,7 +63,7 @@ class TaskViewSet(TenantScopedViewSet):
     # ...
     def get_queryset(self):
         qs = super().get_queryset()
-        # 🚀 Forces a SQL JOIN, eliminating N+1 queries for nested user details
+        # Forces a SQL JOIN, eliminating N+1 queries for nested user details
         return qs.select_related('assignee', 'reporter', 'project')
 ```
 
@@ -71,7 +71,7 @@ Composite database indexes are also applied across all tables (e.g., `INDEX (org
 
 ---
 
-## 📊 Example API Outputs
+## Example API Outputs
 
 OrgFlow prioritizes predictable, structured JSON responses, even when errors occur.
 
@@ -106,7 +106,7 @@ OrgFlow prioritizes predictable, structured JSON responses, even when errors occ
 
 ---
 
-## 🚀 Quick Start (Docker)
+## Quick Start (Docker)
 
 Get the API running locally in seconds using Docker Compose.
 
@@ -132,7 +132,7 @@ Get the API running locally in seconds using Docker Compose.
 
 ---
 
-## 🤖 AI-Assisted Workflow
+## AI-Assisted Workflow
 
 This project was engineered alongside **Claude Code**, demonstrating modern agentic AI development practices:
 
