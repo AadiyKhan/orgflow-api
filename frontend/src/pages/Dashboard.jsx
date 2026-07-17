@@ -5,7 +5,7 @@ import api from '../api';
 import { Plus, MoreHorizontal, ArrowRight, Trash2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { DndContext, DragOverlay, closestCorners, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, arrayMove, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 const COLS = [
@@ -236,7 +236,7 @@ function KanbanColumn({ col, tasks, onAdd, onClickTask }) {
         <button className="kanban-add-btn" onClick={onAdd}><Plus size={15} /></button>
       </div>
       <div className="kanban-col-body" ref={setNodeRef}>
-        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={tasks.map(t => t.id)} strategy={rectSortingStrategy}>
           {tasks.map(t => (
             <SortableTaskCard key={t.id} task={t} onClick={() => onClickTask(t)} />
           ))}
@@ -251,8 +251,9 @@ function SortableTaskCard({ task, onClick }) {
   
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition || 'transform 250ms cubic-bezier(0.175, 0.885, 0.32, 1.275)',
     opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 999 : 'auto',
   };
 
   return (

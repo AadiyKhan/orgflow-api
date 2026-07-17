@@ -57,6 +57,17 @@ html.dark {
   --shadow-lg: 6px 6px 0px #FF2A2A;
 }
 
+/* View Transition API for Dark Mode Toggle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+.dark::view-transition-old(root) { z-index: 2; }
+.dark::view-transition-new(root) { z-index: 1; }
+
 /* ═══════════════════════════════════════════════
    RESETS
    ═══════════════════════════════════════════════ */
