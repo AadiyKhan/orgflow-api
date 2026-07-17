@@ -1,6 +1,8 @@
 from rest_framework import viewsets, mixins, status, permissions
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Organization, OrganizationMember, User
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, UserSerializer
 from .permissions import IsOrganizationMember, IsOrganizationAdmin
@@ -57,3 +59,41 @@ class OrganizationMemberViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['organization'] = self.request.user.current_organization
         return context
+
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        first_name = request.data.get('first_name', '')
+        last_name = request.data.get('last_name', '')
+
+        if not email or not password:
+            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'User with this email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+
+        # Create default organization
+        org_name = f"{first_name or email.split('@')[0]}'s Organization"
+        org = Organization.objects.create(name=org_name)
+        OrganizationMember.objects.create(organization=org, user=user, role='ADMIN')
+        user.current_organization = org
+        user.save()
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': UserSerializer(user).data
+        }, status=status.HTTP_201_CREATED)

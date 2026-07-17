@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import { ArrowRight, Layers } from 'lucide-react';
 
@@ -42,6 +42,9 @@ export default function Login() {
             {loading ? 'Signing in...' : (<>Continue <ArrowRight size={15} /></>)}
           </button>
         </form>
+        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
+          Don't have an account? <Link to="/register" style={{ color: '#38bdf8', textDecoration: 'none' }}>Sign up</Link>
+        </div>
       </div>
     </div>
   );
