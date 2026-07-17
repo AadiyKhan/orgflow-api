@@ -23,5 +23,5 @@ COPY . /app/
 # Expose port
 EXPOSE 8000
 
-# Run entrypoint script or command
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
+# Run migrations and start gunicorn
+CMD sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 config.wsgi:application"
