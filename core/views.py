@@ -137,7 +137,7 @@ class RequestPasswordResetView(APIView):
         
         # Link typically points to frontend
         frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-        reset_link = f"{frontend_url}/reset-password?uid={uid}&token={token}"
+        reset_link = f"{frontend_url}/#/reset-password?uid={uid}&token={token}"
         
         try:
             send_mail(
@@ -211,7 +211,7 @@ class InviteMemberView(APIView):
         
         # Send invite email
         frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-        invite_url = f"{frontend_url}/invite?token={token}"
+        invite_url = f"{frontend_url}/#/invite?token={token}"
         msg = f"You have been invited to join the organization '{org.name}' on OrgFlow.\n\n"
         msg += f"Click the link below to accept or decline the invitation:\n{invite_url}\n\n"
         msg += "If you do not have an account, one will be created for you automatically."
