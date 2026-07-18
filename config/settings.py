@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # Local apps
     'core',
     'projects',
+    'anymail',
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -159,12 +160,20 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Email Settings
-EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+ANYMAIL = {
+    "RESEND_API_KEY": env('RESEND_API_KEY', default=''),
+}
+
+if ANYMAIL["RESEND_API_KEY"]:
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+else:
+    EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+
 EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
