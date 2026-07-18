@@ -148,9 +148,10 @@ class RequestPasswordResetView(APIView):
                 fail_silently=False,
             )
         except Exception as e:
+            error_msg = str(e)
             logger.error('Failed to send password reset email to %s: %s', user.email, e)
             return Response(
-                {'error': 'Failed to send password reset email. Please try again later.'},
+                {'error': f'Failed to send password reset email. Error: {error_msg}'},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
         
@@ -224,9 +225,10 @@ class InviteMemberView(APIView):
                 fail_silently=False,
             )
         except Exception as e:
+            error_msg = str(e)
             logger.error('Failed to send invite email to %s: %s', email, e)
             return Response(
-                {'error': 'Failed to send invite email. Please try again later.'},
+                {'error': f'Failed to send invite email. Error: {error_msg}'},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
             
