@@ -275,9 +275,8 @@ class AcceptInviteView(APIView):
             defaults={'role': role}
         )
         
-        # If user has no current organization, set it
-        if not user.current_organization:
-            user.current_organization = org
-            user.save()
+        # Switch user's active organization to the one they just joined
+        user.current_organization = org
+        user.save()
             
         return Response({'message': f'Successfully joined {org.name}'}, status=status.HTTP_200_OK)
