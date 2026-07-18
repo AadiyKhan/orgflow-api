@@ -1,11 +1,23 @@
+import logging
+
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 from rest_framework import viewsets, mixins, status, permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from .models import Organization, OrganizationMember, User
 from .serializers import OrganizationSerializer, OrganizationMemberSerializer, UserSerializer
 from .permissions import IsOrganizationMember, IsOrganizationAdmin
+
+logger = logging.getLogger(__name__)
 
 class UserViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin):
     serializer_class = UserSerializer
@@ -104,11 +116,7 @@ class RegisterView(APIView):
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
 
-from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.conf import settings
+
 
 class RequestPasswordResetView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -131,13 +139,20 @@ class RequestPasswordResetView(APIView):
         frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
         reset_link = f"{frontend_url}/reset-password?uid={uid}&token={token}"
         
-        send_mail(
-            subject='Reset your OrgFlow Password',
-            message=f'Click the link below to reset your password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email.',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject='Reset your OrgFlow Password',
+                message=f'Click the link below to reset your password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error('Failed to send password reset email to %s: %s', user.email, e)
+            return Response(
+                {'error': 'Failed to send password reset email. Please try again later.'},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
         
         return Response({'message': 'If an account with this email exists, a password reset link has been sent.'}, status=status.HTTP_200_OK)
 
@@ -165,7 +180,7 @@ class ConfirmPasswordResetView(APIView):
             
         return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
 
-from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
+
 
 class InviteMemberView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOrganizationAdmin]
@@ -200,17 +215,24 @@ class InviteMemberView(APIView):
         msg += f"Click the link below to accept or decline the invitation:\n{invite_url}\n\n"
         msg += "If you do not have an account, one will be created for you automatically."
             
-        send_mail(
-            subject=f"You're invited to {org.name} on OrgFlow",
-            message=msg,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject=f"You're invited to {org.name} on OrgFlow",
+                message=msg,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error('Failed to send invite email to %s: %s', email, e)
+            return Response(
+                {'error': 'Failed to send invite email. Please try again later.'},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
             
         return Response({
             'message': f'Invite sent successfully to {email}',
-        }, status=status.HTTP_200_OK)
+        }, status=status.HTTP_201_CREATED)
 
 class AcceptInviteView(APIView):
     permission_classes = [permissions.AllowAny]
